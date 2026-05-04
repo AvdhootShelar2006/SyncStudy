@@ -3,6 +3,7 @@ package com.avdhoot.StudyGroupFinderAPI.controller;
 import com.avdhoot.StudyGroupFinderAPI.model.dto.answer_query.AnswerQueryResponse;
 import com.avdhoot.StudyGroupFinderAPI.model.dto.query_dto.GroupQueryResponse;
 import com.avdhoot.StudyGroupFinderAPI.model.dto.answer_query.AnswerQueryRequest;
+import com.avdhoot.StudyGroupFinderAPI.model.dto.query_dto.QueryRequest;
 import com.avdhoot.StudyGroupFinderAPI.model.interaction.GroupQuery;
 import com.avdhoot.StudyGroupFinderAPI.service.QueryService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,10 +22,11 @@ public class QueryController {
 
     @PostMapping("/groups/{id}/queries")
     public ResponseEntity<?> createQuery(
-            @RequestBody GroupQuery query
-    ){
+            @PathVariable("id") int groupId,
+            @RequestBody QueryRequest request
+            ){
         try{
-            queryService.createQuery(query);
+            queryService.postQuery(groupId, request);
             return new ResponseEntity<>( HttpStatus.CREATED);
         }
         catch (Exception e){

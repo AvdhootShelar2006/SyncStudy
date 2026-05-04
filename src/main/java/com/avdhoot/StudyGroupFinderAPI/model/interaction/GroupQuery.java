@@ -29,6 +29,7 @@ public class GroupQuery {
     @ManyToOne
     @JoinColumn(name = "group_id")
     private StudyGroup studyGroup;
+
     private boolean isResolved;
     private LocalDate createdAt;
 }

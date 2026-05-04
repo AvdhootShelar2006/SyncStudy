@@ -1,5 +1,6 @@
 package com.avdhoot.StudyGroupFinderAPI.service;
 
+import com.avdhoot.StudyGroupFinderAPI.model.dto.group_member_dto.MemberDetailsResponse;
 import com.avdhoot.StudyGroupFinderAPI.model.entities.Member;
 import com.avdhoot.StudyGroupFinderAPI.repository.MemberRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +18,15 @@ public class MemberService {
        return memberRepository.saveAll(members);
     }
 
-    public Member getAllMemberById(int memberId) {
-        return memberRepository.findById(memberId).orElse(new Member(-1));
+    public MemberDetailsResponse getMemberById(int memberId) {
+        Member member = memberRepository
+                .findById(memberId)
+                .orElseThrow();
+
+        return new MemberDetailsResponse(
+                member.getName(),
+                member.getEmail(),
+                member.getCreatedAt()
+        );
     }
 }

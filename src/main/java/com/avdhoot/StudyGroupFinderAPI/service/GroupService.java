@@ -1,10 +1,11 @@
 package com.avdhoot.StudyGroupFinderAPI.service;
 
+import com.avdhoot.StudyGroupFinderAPI.model.dto.group_member_dto.GroupMemberDetailsResponse;
 import com.avdhoot.StudyGroupFinderAPI.model.entities.GroupMembership;
 import com.avdhoot.StudyGroupFinderAPI.model.entities.Member;
 import com.avdhoot.StudyGroupFinderAPI.model.entities.StudyGroup;
-import com.avdhoot.StudyGroupFinderAPI.model.dto.group_dto.JoinLeaveRequest;
-import com.avdhoot.StudyGroupFinderAPI.model.dto.group_dto.JoinLeaveResponse;
+import com.avdhoot.StudyGroupFinderAPI.model.dto.group_member_dto.JoinLeaveRequest;
+import com.avdhoot.StudyGroupFinderAPI.model.dto.group_member_dto.JoinLeaveResponse;
 import com.avdhoot.StudyGroupFinderAPI.repository.GroupMembershipRepository;
 import com.avdhoot.StudyGroupFinderAPI.repository.GroupRepository;
 import com.avdhoot.StudyGroupFinderAPI.repository.MemberRepository;
@@ -12,6 +13,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.GregorianCalendar;
 import java.util.List;
 
 @Service
@@ -63,18 +66,23 @@ public class GroupService {
     }
 
 
-    public List<Member> getAllGroupMembers(int groupId) {
+    public List<GroupMemberDetailsResponse> getAllGroupMembers(int groupId) {
 
         StudyGroup group = groupRepository.
                 findById(groupId)
                 .orElseThrow(()-> new RuntimeException("Group Not Found!"));
 
         List<GroupMembership> memberships = groupMembershipRepository.findByGroup_Id(groupId);
+        List<GroupMemberDetailsResponse> responses = new ArrayList<>();
 
-        return memberships
-                .stream()
-                .map(GroupMembership::getMember)
-                .toList();
+        for(GroupMembership membership : memberships){
+            GroupMemberDetailsResponse response = new GroupMemberDetailsResponse(
+                    membership.getMember().getName()
+            );
+            responses.add(response);
+        }
+
+        return responses;
     }
 
     public JoinLeaveResponse leaveGroup(int groupId, JoinLeaveRequest request){

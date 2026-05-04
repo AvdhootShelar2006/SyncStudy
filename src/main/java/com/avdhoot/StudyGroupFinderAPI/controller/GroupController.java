@@ -1,7 +1,8 @@
 package com.avdhoot.StudyGroupFinderAPI.controller;
 
-import com.avdhoot.StudyGroupFinderAPI.model.dto.group_dto.JoinLeaveRequest;
-import com.avdhoot.StudyGroupFinderAPI.model.dto.group_dto.JoinLeaveResponse;
+import com.avdhoot.StudyGroupFinderAPI.model.dto.group_member_dto.GroupMemberDetailsResponse;
+import com.avdhoot.StudyGroupFinderAPI.model.dto.group_member_dto.JoinLeaveRequest;
+import com.avdhoot.StudyGroupFinderAPI.model.dto.group_member_dto.JoinLeaveResponse;
 import com.avdhoot.StudyGroupFinderAPI.model.entities.Member;
 import com.avdhoot.StudyGroupFinderAPI.model.entities.StudyGroup;
 import com.avdhoot.StudyGroupFinderAPI.service.GroupService;
@@ -36,12 +37,12 @@ public class GroupController {
     }
 
     @PatchMapping("/group/update/{id}")
-    public ResponseEntity<?> updateGroup(@PathVariable("id") int groupId,@RequestBody StudyGroup group){
+    public ResponseEntity<?> updateGroup(@PathVariable("id") int groupId, @RequestBody StudyGroup group){
         StudyGroup studyGroup = null;
         try{
             group.setId(groupId);
             studyGroup =  service.updateGroup(groupId, group);
-            return new ResponseEntity<>("Updated", HttpStatus.OK);
+            return new ResponseEntity<>(studyGroup, HttpStatus.OK);
         } catch (Exception e){
             return new ResponseEntity<>( HttpStatus.BAD_REQUEST);
         }
@@ -83,10 +84,10 @@ public class GroupController {
 
     // Get All Members
     @GetMapping("/groups/{id}/members")
-    public ResponseEntity<List<Member>> getAllGroupMembers(
+    public ResponseEntity<List<GroupMemberDetailsResponse>> getAllGroupMembers(
             @PathVariable("id") int groupId ){
 
-        List<Member> allMembers = service.getAllGroupMembers(groupId);
+        List<GroupMemberDetailsResponse> allMembers = service.getAllGroupMembers(groupId);
 
         return new ResponseEntity<>(allMembers,HttpStatus.OK);
     }

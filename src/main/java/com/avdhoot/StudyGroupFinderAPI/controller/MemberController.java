@@ -1,5 +1,6 @@
 package com.avdhoot.StudyGroupFinderAPI.controller;
 
+import com.avdhoot.StudyGroupFinderAPI.model.dto.group_member_dto.MemberDetailsResponse;
 import com.avdhoot.StudyGroupFinderAPI.model.entities.Member;
 import com.avdhoot.StudyGroupFinderAPI.service.MemberService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,10 +19,15 @@ public class MemberController {
 
 
     @GetMapping("/member/{id}")
-    public ResponseEntity<Member> getMembersId(@PathVariable("id") int memberId){
-        Member getMember = memberService.getAllMemberById(memberId);
-        if(getMember.getId() > 0){
-        return new ResponseEntity<>(getMember, HttpStatus.OK);
+    public ResponseEntity<MemberDetailsResponse> getMembersId(
+            @PathVariable("id") int memberId
+    ){
+
+        MemberDetailsResponse response = null;
+
+        if(memberId > 0){
+            response = memberService.getMemberById(memberId);
+        return new ResponseEntity<>(response, HttpStatus.OK);
         } else{
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }

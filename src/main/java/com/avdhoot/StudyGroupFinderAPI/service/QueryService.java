@@ -2,6 +2,7 @@ package com.avdhoot.StudyGroupFinderAPI.service;
 
 import com.avdhoot.StudyGroupFinderAPI.model.dto.answer_query.AnswerQueryRequest;
 import com.avdhoot.StudyGroupFinderAPI.model.dto.answer_query.AnswerQueryResponse;
+import com.avdhoot.StudyGroupFinderAPI.model.dto.query_dto.QueryRequest;
 import com.avdhoot.StudyGroupFinderAPI.model.entities.Member;
 import com.avdhoot.StudyGroupFinderAPI.model.entities.StudyGroup;
 import com.avdhoot.StudyGroupFinderAPI.model.dto.query_dto.GroupQueryResponse;
@@ -32,6 +33,7 @@ public class QueryService {
 
     @Autowired
     private AnswerRepository answerRepository;
+    /*
 
     public void createQuery(GroupQuery inputQuery) {
         Integer memberId = inputQuery.getPostedBy().getId();
@@ -46,6 +48,7 @@ public class QueryService {
 
         groupQueryRepository.save(inputQuery);
     }
+    */
 
     public List<GroupQueryResponse> getAllGroupQueris(Integer groupId) {
 
@@ -162,6 +165,22 @@ public class QueryService {
             responses.add(queryResponse);
         }
         return responses;
+    }
+
+    public void postQuery(int groupId, QueryRequest request) {
+        GroupQuery newQuery = new GroupQuery();
+        newQuery.setTitle(request.title());
+        newQuery.setDescription(request.description());
+        newQuery.setResolved(false);
+        newQuery.setCreatedAt(LocalDate.now());
+
+        Member member = memberRepository.findById(request.memberId()).orElseThrow();
+        StudyGroup group = groupRepository.findById(groupId).orElseThrow();
+
+        newQuery.setPostedBy(member);
+        newQuery.setStudyGroup(group);
+
+        groupQueryRepository.save(newQuery);
     }
 }
 
