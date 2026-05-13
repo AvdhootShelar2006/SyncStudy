@@ -3,7 +3,6 @@ package com.avdhoot.StudyGroupFinderAPI.controller;
 import com.avdhoot.StudyGroupFinderAPI.model.dto.group_member_dto.GroupMemberDetailsResponse;
 import com.avdhoot.StudyGroupFinderAPI.model.dto.group_member_dto.JoinLeaveRequest;
 import com.avdhoot.StudyGroupFinderAPI.model.dto.group_member_dto.JoinLeaveResponse;
-import com.avdhoot.StudyGroupFinderAPI.model.entities.Member;
 import com.avdhoot.StudyGroupFinderAPI.model.entities.StudyGroup;
 import com.avdhoot.StudyGroupFinderAPI.service.GroupService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -102,4 +101,5 @@ public class GroupController {
 
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
+
 }
