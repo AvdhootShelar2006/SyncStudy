@@ -6,16 +6,17 @@ import com.avdhoot.StudyGroupFinderAPI.model.entities.Member;
 import com.avdhoot.StudyGroupFinderAPI.model.entities.StudyGroup;
 import com.avdhoot.StudyGroupFinderAPI.model.dto.group_member_dto.JoinLeaveRequest;
 import com.avdhoot.StudyGroupFinderAPI.model.dto.group_member_dto.JoinLeaveResponse;
-import com.avdhoot.StudyGroupFinderAPI.repository.GroupMembershipRepository;
-import com.avdhoot.StudyGroupFinderAPI.repository.GroupRepository;
+import com.avdhoot.StudyGroupFinderAPI.repository.groupRepository.GroupMembershipRepository;
+import com.avdhoot.StudyGroupFinderAPI.repository.groupRepository.GroupRepository;
 import com.avdhoot.StudyGroupFinderAPI.repository.MemberRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.GregorianCalendar;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class GroupService {
@@ -64,7 +65,6 @@ public class GroupService {
             return new JoinLeaveResponse("Couldn't Join Group!");
         }
     }
-
 
     public List<GroupMemberDetailsResponse> getAllGroupMembers(int groupId) {
 
@@ -125,5 +125,35 @@ public class GroupService {
         }
 
         return groupRepository.save(existingGroup);
+    }
+
+    public List<StudyGroup> searchGroups(String keyword) {
+        return groupRepository.searchUsingKeyword(keyword);
+    }
+
+    public  List<GroupMemberDetailsResponse> filterMemberByDate(int groupId, LocalDate startDate, Optional<LocalDate> endDate, Pageable pageable) {
+
+        StudyGroup group = groupRepository.
+                findById(groupId)
+                .orElseThrow(()-> new RuntimeException());
+
+        List<GroupMembership> groupMemberships = new ArrayList<>();
+
+        if(endDate.isEmpty()){
+            groupMemberships  = groupMembershipRepository.findByGroup_IdAndJoinedAtAfter(groupId, startDate, pageable);
+        } else{
+            groupMemberships  = groupMembershipRepository.findByGroup_IdAndJoinedAtBetween(groupId, startDate, endDate, pageable);
+        }
+
+        List<GroupMemberDetailsResponse> members = new ArrayList<>();
+
+        for(GroupMembership membership : groupMemberships){
+           GroupMemberDetailsResponse response = new GroupMemberDetailsResponse(
+                   membership.getMember().getName()
+           );
+           members.add(response);
+        }
+
+        return members;
     }
 }

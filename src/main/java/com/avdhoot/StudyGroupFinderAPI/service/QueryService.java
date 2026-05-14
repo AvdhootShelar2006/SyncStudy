@@ -8,9 +8,9 @@ import com.avdhoot.StudyGroupFinderAPI.model.entities.StudyGroup;
 import com.avdhoot.StudyGroupFinderAPI.model.dto.query_dto.GroupQueryResponse;
 import com.avdhoot.StudyGroupFinderAPI.model.interaction.AnswerQuery;
 import com.avdhoot.StudyGroupFinderAPI.model.interaction.GroupQuery;
-import com.avdhoot.StudyGroupFinderAPI.repository.AnswerRepository;
-import com.avdhoot.StudyGroupFinderAPI.repository.GroupQueryRepository;
-import com.avdhoot.StudyGroupFinderAPI.repository.GroupRepository;
+import com.avdhoot.StudyGroupFinderAPI.repository.queryRepository.AnswerRepository;
+import com.avdhoot.StudyGroupFinderAPI.repository.queryRepository.GroupQueryRepository;
+import com.avdhoot.StudyGroupFinderAPI.repository.groupRepository.GroupRepository;
 import com.avdhoot.StudyGroupFinderAPI.repository.MemberRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -160,7 +160,8 @@ public class QueryService {
         for( AnswerQuery query : queries){
             AnswerQueryResponse queryResponse = new AnswerQueryResponse(
                     query.getContent(),
-                    groupQuery.getPostedBy().getName(),groupQuery.getTitle()
+                    groupQuery.getPostedBy().getName(),
+                    groupQuery.getTitle()
             );
             responses.add(queryResponse);
         }

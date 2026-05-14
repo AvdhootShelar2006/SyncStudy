@@ -6,11 +6,15 @@ import com.avdhoot.StudyGroupFinderAPI.model.dto.group_member_dto.JoinLeaveRespo
 import com.avdhoot.StudyGroupFinderAPI.model.entities.StudyGroup;
 import com.avdhoot.StudyGroupFinderAPI.service.GroupService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import org.springframework.data.domain.Pageable;
+import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("api")
@@ -80,6 +84,8 @@ public class GroupController {
         return new ResponseEntity<>(response, HttpStatus.ACCEPTED);
     }
 
+    // TODO:   Currently generating duplicate entries (One member getting added in one group multiple times creating false entries(NonUniqueResultException))
+
 
     // Get All Members
     @GetMapping("/groups/{id}/members")
@@ -100,6 +106,26 @@ public class GroupController {
         JoinLeaveResponse response = service.leaveGroup(groupId, request);
 
         return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+
+    // Search By Keyword
+    @GetMapping("/search")
+    public ResponseEntity<List<StudyGroup> > search(@RequestParam String keyword){
+        List<StudyGroup> groups = service.searchGroups(keyword);
+        System.out.println("Searching with " + keyword);
+        return new ResponseEntity<>(groups, HttpStatus.FOUND);
+    }
+
+    @GetMapping("/groups/{id}/join-date")
+    public ResponseEntity<List<GroupMemberDetailsResponse>> getMemberByDate(
+            @PathVariable("id") int groupId,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Optional<LocalDate> endDate,
+            Pageable pageable){
+
+       List<GroupMemberDetailsResponse> members = service.filterMemberByDate(groupId, startDate, endDate, pageable);
+        return new ResponseEntity<>(members, HttpStatus.OK);
     }
 
 }

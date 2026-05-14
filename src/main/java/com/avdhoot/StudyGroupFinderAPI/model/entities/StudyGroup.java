@@ -30,6 +30,7 @@ public class StudyGroup {
     @Column(updatable = false)
     private LocalDate createdAt;
 
+    @Column(name = "group_admin")
     private String createdBy;
 
     public StudyGroup(int i) {
