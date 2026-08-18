@@ -1,8 +1,6 @@
 package com.avdhoot.StudyGroupFinderAPI.controller;
 
-import com.avdhoot.StudyGroupFinderAPI.model.dto.group_member_dto.GroupMemberDetailsResponse;
-import com.avdhoot.StudyGroupFinderAPI.model.dto.group_member_dto.JoinLeaveRequest;
-import com.avdhoot.StudyGroupFinderAPI.model.dto.group_member_dto.JoinLeaveResponse;
+import com.avdhoot.StudyGroupFinderAPI.model.dto.group_member_dto.*;
 import com.avdhoot.StudyGroupFinderAPI.model.entities.StudyGroup;
 import com.avdhoot.StudyGroupFinderAPI.service.GroupService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -76,12 +74,12 @@ public class GroupController {
 
     // Join Group
     @PostMapping("/groups/{id}/join")
-    public ResponseEntity<JoinLeaveResponse> joinGroup(
-            @PathVariable("id") int groupId, @RequestBody JoinLeaveRequest request){
+    public ResponseEntity<List<JoinLeaveResponse>> joinGroup(
+            @PathVariable("id") int groupId, @RequestBody List<JoinLeaveRequest> request){
 
-        JoinLeaveResponse response = service.joinGroup(groupId, request);
+        List<JoinLeaveResponse> responses = service.joinGroup(groupId, request);
 
-        return new ResponseEntity<>(response, HttpStatus.ACCEPTED);
+        return new ResponseEntity<>(responses, HttpStatus.ACCEPTED);
     }
 
     // TODO:   Currently generating duplicate entries (One member getting added in one group multiple times creating false entries(NonUniqueResultException))
@@ -126,6 +124,14 @@ public class GroupController {
 
        List<GroupMemberDetailsResponse> members = service.filterMemberByDate(groupId, startDate, endDate, pageable);
         return new ResponseEntity<>(members, HttpStatus.OK);
+    }
+
+    @PostMapping("/groups/{id}/report")
+    public ResponseEntity<?> groupReport(@PathVariable("id") int groupId, @RequestBody ReportRequest request){
+//        List<ReportStatusResponse> responses = service.groupReport(groupId, request);;
+
+        service.groupReport(groupId, request);
+        return new ResponseEntity<>( HttpStatus.CREATED);
     }
 
 }

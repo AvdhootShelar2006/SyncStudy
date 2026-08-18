@@ -1,18 +1,19 @@
 package com.avdhoot.StudyGroupFinderAPI.service;
 
-import com.avdhoot.StudyGroupFinderAPI.model.dto.group_member_dto.GroupMemberDetailsResponse;
+import com.avdhoot.StudyGroupFinderAPI.model.Report;
+import com.avdhoot.StudyGroupFinderAPI.model.dto.group_member_dto.*;
 import com.avdhoot.StudyGroupFinderAPI.model.entities.GroupMembership;
 import com.avdhoot.StudyGroupFinderAPI.model.entities.Member;
 import com.avdhoot.StudyGroupFinderAPI.model.entities.StudyGroup;
-import com.avdhoot.StudyGroupFinderAPI.model.dto.group_member_dto.JoinLeaveRequest;
-import com.avdhoot.StudyGroupFinderAPI.model.dto.group_member_dto.JoinLeaveResponse;
 import com.avdhoot.StudyGroupFinderAPI.repository.groupRepository.GroupMembershipRepository;
 import com.avdhoot.StudyGroupFinderAPI.repository.groupRepository.GroupRepository;
 import com.avdhoot.StudyGroupFinderAPI.repository.MemberRepository;
+import com.avdhoot.StudyGroupFinderAPI.repository.groupRepository.ReportRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.data.domain.Pageable;
 
+import javax.management.RuntimeMBeanException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -30,6 +31,10 @@ public class GroupService {
     @Autowired
     private GroupMembershipRepository groupMembershipRepository;
 
+
+    @Autowired
+    private ReportRepository reportRepository;
+
     public StudyGroup createGroup(StudyGroup studyGroup) {
         return groupRepository.save(studyGroup);
     }
@@ -42,29 +47,7 @@ public class GroupService {
         return groupRepository.findById(id).orElse(new StudyGroup(-1));
     }
 
-    public JoinLeaveResponse joinGroup(int groupId, JoinLeaveRequest request) {
-        StudyGroup group = groupRepository.
-                findById(groupId)
-                .orElseThrow(()-> new RuntimeException("Group Not Found!"));
 
-        Member member = memberRepository
-                .findById(request.memberId())
-                .orElseThrow(() -> new RuntimeException("Member not Found!"));
-
-        if(group.getIsOpen()){
-            GroupMembership membership = new GroupMembership();
-
-            membership.setMember(member);
-            membership.setGroup(group);
-            membership.setJoinedAt(LocalDate.now());
-
-            groupMembershipRepository.save(membership);
-            return new JoinLeaveResponse(" Successfully joined the group!");
-        }
-        else{
-            return new JoinLeaveResponse("Couldn't Join Group!");
-        }
-    }
 
     public List<GroupMemberDetailsResponse> getAllGroupMembers(int groupId) {
 
@@ -155,5 +138,62 @@ public class GroupService {
         }
 
         return members;
+    }
+
+    public void groupReport(int groupId, ReportRequest request) {
+      if(!groupMembershipRepository.existsByGroup_IdAndMember_Id(groupId, request.reportedBy())){
+          throw new RuntimeException("You are not a member of the group!");
+      }
+
+      if(!groupMembershipRepository.existsByGroup_IdAndMember_Id(groupId, request.targetMember())){
+          throw new RuntimeException("The reported user is not a member of the group!");
+      }
+        Member reportedBy = memberRepository.findById(request.reportedBy())
+                .orElseThrow(() -> new RuntimeException("Reporter does not exist"));
+
+        Member targetMember = memberRepository.findById(request.targetMember())
+                .orElseThrow(() -> new RuntimeException("Target member does not exist"));
+
+        Report report = new Report();
+        report.setReportedBy(reportedBy);
+        report.setTargetMemberId(targetMember);
+        report.setReason(request.reason());
+
+      reportRepository.save(report);
+
+    }
+
+    public List<JoinLeaveResponse> joinGroup(int groupId, List<JoinLeaveRequest> request) {
+            StudyGroup group = groupRepository.
+                    findById(groupId)
+                    .orElseThrow(()-> new RuntimeException("Group Not Found!"));
+            List<Integer> memberIDs = request.stream().map(JoinLeaveRequest::memberId).toList();
+
+
+            List<Member> members = memberRepository.findAllById(memberIDs);
+
+            if(group.getIsOpen()){
+                for(Member member : members) {
+                    GroupMembership membership = new GroupMembership();
+
+                    membership.setMember(member);
+                    membership.setGroup(group);
+                    membership.setJoinedAt(LocalDate.now());
+
+                    groupMembershipRepository.save(membership);
+                }
+
+            }
+            List<JoinLeaveResponse> responses = new ArrayList<>();
+
+        for(Member member : members) {
+            JoinLeaveResponse response = new JoinLeaveResponse(
+                    member.getName()
+            );
+            responses.add(response);
+        }
+
+        return responses;
+
     }
 }

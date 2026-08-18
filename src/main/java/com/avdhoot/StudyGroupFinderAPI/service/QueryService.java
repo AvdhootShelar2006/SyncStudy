@@ -170,6 +170,7 @@ public class QueryService {
 
     public void postQuery(int groupId, QueryRequest request) {
         GroupQuery newQuery = new GroupQuery();
+
         newQuery.setTitle(request.title());
         newQuery.setDescription(request.description());
         newQuery.setResolved(false);

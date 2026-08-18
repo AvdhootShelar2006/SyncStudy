@@ -1,5 +1,6 @@
 package com.avdhoot.StudyGroupFinderAPI.model.entities;
 
+import com.avdhoot.StudyGroupFinderAPI.model.entities.enums.ActionType;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;

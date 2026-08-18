@@ -1,4 +1,4 @@
-package com.avdhoot.StudyGroupFinderAPI.model.entities;
+package com.avdhoot.StudyGroupFinderAPI.model.entities.enums;
 
 public enum ActionType {
     JOIN_GROUP,
