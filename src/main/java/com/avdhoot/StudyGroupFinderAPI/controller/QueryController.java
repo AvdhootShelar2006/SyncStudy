@@ -4,7 +4,6 @@ import com.avdhoot.StudyGroupFinderAPI.model.dto.answer_query.AnswerQueryRespons
 import com.avdhoot.StudyGroupFinderAPI.model.dto.query_dto.GroupQueryResponse;
 import com.avdhoot.StudyGroupFinderAPI.model.dto.answer_query.AnswerQueryRequest;
 import com.avdhoot.StudyGroupFinderAPI.model.dto.query_dto.QueryRequest;
-import com.avdhoot.StudyGroupFinderAPI.model.interaction.GroupQuery;
 import com.avdhoot.StudyGroupFinderAPI.service.QueryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;

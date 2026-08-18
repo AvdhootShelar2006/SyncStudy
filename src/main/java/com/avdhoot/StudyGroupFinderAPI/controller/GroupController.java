@@ -1,16 +1,18 @@
 package com.avdhoot.StudyGroupFinderAPI.controller;
 
-import com.avdhoot.StudyGroupFinderAPI.model.dto.group_member_dto.GroupMemberDetailsResponse;
-import com.avdhoot.StudyGroupFinderAPI.model.dto.group_member_dto.JoinLeaveRequest;
-import com.avdhoot.StudyGroupFinderAPI.model.dto.group_member_dto.JoinLeaveResponse;
+import com.avdhoot.StudyGroupFinderAPI.model.dto.group_member_dto.*;
 import com.avdhoot.StudyGroupFinderAPI.model.entities.StudyGroup;
 import com.avdhoot.StudyGroupFinderAPI.service.GroupService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import org.springframework.data.domain.Pageable;
+import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("api")
@@ -72,13 +74,15 @@ public class GroupController {
 
     // Join Group
     @PostMapping("/groups/{id}/join")
-    public ResponseEntity<JoinLeaveResponse> joinGroup(
-            @PathVariable("id") int groupId, @RequestBody JoinLeaveRequest request){
+    public ResponseEntity<List<JoinLeaveResponse>> joinGroup(
+            @PathVariable("id") int groupId, @RequestBody List<JoinLeaveRequest> request){
 
-        JoinLeaveResponse response = service.joinGroup(groupId, request);
+        List<JoinLeaveResponse> responses = service.joinGroup(groupId, request);
 
-        return new ResponseEntity<>(response, HttpStatus.ACCEPTED);
+        return new ResponseEntity<>(responses, HttpStatus.ACCEPTED);
     }
+
+    // TODO:   Currently generating duplicate entries (One member getting added in one group multiple times creating false entries(NonUniqueResultException))
 
 
     // Get All Members
@@ -100,6 +104,34 @@ public class GroupController {
         JoinLeaveResponse response = service.leaveGroup(groupId, request);
 
         return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+
+    // Search By Keyword
+    @GetMapping("/search")
+    public ResponseEntity<List<StudyGroup> > search(@RequestParam String keyword){
+        List<StudyGroup> groups = service.searchGroups(keyword);
+        System.out.println("Searching with " + keyword);
+        return new ResponseEntity<>(groups, HttpStatus.FOUND);
+    }
+
+    @GetMapping("/groups/{id}/join-date")
+    public ResponseEntity<List<GroupMemberDetailsResponse>> getMemberByDate(
+            @PathVariable("id") int groupId,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Optional<LocalDate> endDate,
+            Pageable pageable){
+
+       List<GroupMemberDetailsResponse> members = service.filterMemberByDate(groupId, startDate, endDate, pageable);
+        return new ResponseEntity<>(members, HttpStatus.OK);
+    }
+
+    @PostMapping("/groups/{id}/report")
+    public ResponseEntity<?> groupReport(@PathVariable("id") int groupId, @RequestBody ReportRequest request){
+//        List<ReportStatusResponse> responses = service.groupReport(groupId, request);;
+
+        service.groupReport(groupId, request);
+        return new ResponseEntity<>( HttpStatus.CREATED);
     }
 
 }
