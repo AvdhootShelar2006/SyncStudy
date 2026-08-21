@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("api")
+@RequestMapping("groupmate")
 public class GroupController {
 
     @Autowired
@@ -74,12 +74,12 @@ public class GroupController {
 
     // Join Group
     @PostMapping("/groups/{id}/join")
-    public ResponseEntity<List<JoinLeaveResponse>> joinGroup(
+    public ResponseEntity<?> joinGroup(
             @PathVariable("id") int groupId, @RequestBody List<JoinLeaveRequest> request){
 
-        List<JoinLeaveResponse> responses = service.joinGroup(groupId, request);
+       service.joinGroup(groupId, request);
 
-        return new ResponseEntity<>(responses, HttpStatus.ACCEPTED);
+        return new ResponseEntity<>("Group Joined!", HttpStatus.ACCEPTED);
     }
 
     // TODO:   Currently generating duplicate entries (One member getting added in one group multiple times creating false entries(NonUniqueResultException))
@@ -126,12 +126,6 @@ public class GroupController {
         return new ResponseEntity<>(members, HttpStatus.OK);
     }
 
-    @PostMapping("/groups/{id}/report")
-    public ResponseEntity<?> groupReport(@PathVariable("id") int groupId, @RequestBody ReportRequest request){
-//        List<ReportStatusResponse> responses = service.groupReport(groupId, request);;
 
-        service.groupReport(groupId, request);
-        return new ResponseEntity<>( HttpStatus.CREATED);
-    }
 
 }

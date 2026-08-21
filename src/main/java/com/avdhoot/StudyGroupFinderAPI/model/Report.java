@@ -23,13 +23,15 @@ public class Report {
     private Member reportedBy;
 
     @ManyToOne
-    @JoinColumn(name="traget_Group_Id")
+    @JoinColumn(name="target_Group_Id")
     private StudyGroup targetGroupId;
 
     @ManyToOne
     @JoinColumn(name = "target_member_id")
     private Member targetMemberId;
     private String reason;
+
+    @Enumerated(EnumType.STRING)
     private ReportStatus status;
-    private LocalDateTime createdAt;
+    private LocalDateTime reportedTime;
 }

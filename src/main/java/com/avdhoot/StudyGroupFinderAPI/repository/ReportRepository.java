@@ -1,4 +1,4 @@
-package com.avdhoot.StudyGroupFinderAPI.repository.groupRepository;
+package com.avdhoot.StudyGroupFinderAPI.repository;
 
 import com.avdhoot.StudyGroupFinderAPI.model.Report;
 import org.springframework.data.jpa.repository.JpaRepository;

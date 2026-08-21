@@ -1,4 +1,4 @@
-package com.avdhoot.StudyGroupFinderAPI.model.dto.group_member_dto;
+package com.avdhoot.StudyGroupFinderAPI.model.dto.report_dto;
 
 public record ReportRequest(
         int reportedBy,

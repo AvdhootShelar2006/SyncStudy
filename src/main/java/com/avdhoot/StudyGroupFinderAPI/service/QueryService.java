@@ -3,11 +3,13 @@ package com.avdhoot.StudyGroupFinderAPI.service;
 import com.avdhoot.StudyGroupFinderAPI.model.dto.answer_query.AnswerQueryRequest;
 import com.avdhoot.StudyGroupFinderAPI.model.dto.answer_query.AnswerQueryResponse;
 import com.avdhoot.StudyGroupFinderAPI.model.dto.query_dto.QueryRequest;
+import com.avdhoot.StudyGroupFinderAPI.model.entities.GroupMembership;
 import com.avdhoot.StudyGroupFinderAPI.model.entities.Member;
 import com.avdhoot.StudyGroupFinderAPI.model.entities.StudyGroup;
 import com.avdhoot.StudyGroupFinderAPI.model.dto.query_dto.GroupQueryResponse;
 import com.avdhoot.StudyGroupFinderAPI.model.interaction.AnswerQuery;
 import com.avdhoot.StudyGroupFinderAPI.model.interaction.GroupQuery;
+import com.avdhoot.StudyGroupFinderAPI.repository.groupRepository.GroupMembershipRepository;
 import com.avdhoot.StudyGroupFinderAPI.repository.queryRepository.AnswerRepository;
 import com.avdhoot.StudyGroupFinderAPI.repository.queryRepository.GroupQueryRepository;
 import com.avdhoot.StudyGroupFinderAPI.repository.groupRepository.GroupRepository;
@@ -24,15 +26,14 @@ public class QueryService {
 
     @Autowired
     private GroupQueryRepository groupQueryRepository;
-
     @Autowired
     private GroupRepository groupRepository;
-
     @Autowired
     private MemberRepository memberRepository;
-
     @Autowired
     private AnswerRepository answerRepository;
+    @Autowired
+    private GroupMembershipRepository groupMembershipRepository;
     /*
 
     public void createQuery(GroupQuery inputQuery) {
@@ -169,20 +170,21 @@ public class QueryService {
     }
 
     public void postQuery(int groupId, QueryRequest request) {
-        GroupQuery newQuery = new GroupQuery();
-
-        newQuery.setTitle(request.title());
-        newQuery.setDescription(request.description());
-        newQuery.setResolved(false);
-        newQuery.setCreatedAt(LocalDate.now());
-
         Member member = memberRepository.findById(request.memberId()).orElseThrow();
         StudyGroup group = groupRepository.findById(groupId).orElseThrow();
 
-        newQuery.setPostedBy(member);
-        newQuery.setStudyGroup(group);
+            if(groupMembershipRepository.existsByGroupAndMember(group, member)) {
+            GroupQuery newQuery = new GroupQuery();
 
-        groupQueryRepository.save(newQuery);
+            newQuery.setTitle(request.title());
+            newQuery.setDescription(request.description());
+            newQuery.setResolved(false);
+            newQuery.setCreatedAt(LocalDate.now());
+            newQuery.setPostedBy(member);
+            newQuery.setStudyGroup(group);
+
+            groupQueryRepository.save(newQuery);
+        }
     }
 }
 
