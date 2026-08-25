@@ -1,20 +1,19 @@
 package com.avdhoot.StudyGroupFinderAPI.service;
 
-import com.avdhoot.StudyGroupFinderAPI.model.dto.answer_query.AnswerQueryRequest;
-import com.avdhoot.StudyGroupFinderAPI.model.dto.answer_query.AnswerQueryResponse;
-import com.avdhoot.StudyGroupFinderAPI.model.dto.query_dto.QueryRequest;
-import com.avdhoot.StudyGroupFinderAPI.model.entities.GroupMembership;
-import com.avdhoot.StudyGroupFinderAPI.model.entities.Member;
-import com.avdhoot.StudyGroupFinderAPI.model.entities.StudyGroup;
-import com.avdhoot.StudyGroupFinderAPI.model.dto.query_dto.GroupQueryResponse;
-import com.avdhoot.StudyGroupFinderAPI.model.interaction.AnswerQuery;
-import com.avdhoot.StudyGroupFinderAPI.model.interaction.GroupQuery;
+import com.avdhoot.StudyGroupFinderAPI.model.dto.answerQuery.AnswerQueryRequest;
+import com.avdhoot.StudyGroupFinderAPI.model.dto.answerQuery.AnswerQueryResponse;
+import com.avdhoot.StudyGroupFinderAPI.model.dto.queryDto.QueryRequest;
+import com.avdhoot.StudyGroupFinderAPI.model.entity.Member;
+import com.avdhoot.StudyGroupFinderAPI.model.entity.StudyGroup;
+import com.avdhoot.StudyGroupFinderAPI.model.dto.queryDto.GroupQueryResponse;
+import com.avdhoot.StudyGroupFinderAPI.model.entity.AnswerQuery;
+import com.avdhoot.StudyGroupFinderAPI.model.entity.GroupQuery;
 import com.avdhoot.StudyGroupFinderAPI.repository.groupRepository.GroupMembershipRepository;
 import com.avdhoot.StudyGroupFinderAPI.repository.queryRepository.AnswerRepository;
 import com.avdhoot.StudyGroupFinderAPI.repository.queryRepository.GroupQueryRepository;
 import com.avdhoot.StudyGroupFinderAPI.repository.groupRepository.GroupRepository;
 import com.avdhoot.StudyGroupFinderAPI.repository.MemberRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -22,18 +21,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class QueryService {
 
-    @Autowired
-    private GroupQueryRepository groupQueryRepository;
-    @Autowired
-    private GroupRepository groupRepository;
-    @Autowired
-    private MemberRepository memberRepository;
-    @Autowired
-    private AnswerRepository answerRepository;
-    @Autowired
-    private GroupMembershipRepository groupMembershipRepository;
+    private final GroupQueryRepository groupQueryRepository;
+    private final GroupRepository groupRepository;
+    private final MemberRepository memberRepository;
+    private final AnswerRepository answerRepository;
+    private final GroupMembershipRepository groupMembershipRepository;
+
     /*
 
     public void createQuery(GroupQuery inputQuery) {
@@ -111,7 +107,6 @@ public class QueryService {
         groupQueryRepository.save(query);
         return response;
     }
-
 
     public AnswerQueryResponse answerQuery(int groupId,int queryId, AnswerQueryRequest request) {
 

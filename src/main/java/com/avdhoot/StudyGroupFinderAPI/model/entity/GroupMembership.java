@@ -1,4 +1,4 @@
-package com.avdhoot.StudyGroupFinderAPI.model.entities;
+package com.avdhoot.StudyGroupFinderAPI.model.entity;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;

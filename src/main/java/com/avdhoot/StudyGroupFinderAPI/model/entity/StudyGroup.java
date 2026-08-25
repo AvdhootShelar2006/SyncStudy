@@ -1,4 +1,4 @@
-package com.avdhoot.StudyGroupFinderAPI.model.entities;
+package com.avdhoot.StudyGroupFinderAPI.model.entity;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -33,6 +33,4 @@ public class StudyGroup {
     @Column(name = "group_admin")
     private String createdBy;
 
-    public StudyGroup(int i) {
-    }
 }

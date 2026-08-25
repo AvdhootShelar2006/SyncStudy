@@ -1,4 +1,4 @@
-package com.avdhoot.StudyGroupFinderAPI.model.entities;
+package com.avdhoot.StudyGroupFinderAPI.model.entity;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -25,6 +25,4 @@ public class Member {
     @Column(updatable = false)
     private LocalDate createdAt;
 
-    public Member(int i) {
-    }
 }

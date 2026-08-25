@@ -1,63 +1,59 @@
 package com.avdhoot.StudyGroupFinderAPI.service;
 
-import com.avdhoot.StudyGroupFinderAPI.model.dto.group_member_dto.*;
-import com.avdhoot.StudyGroupFinderAPI.model.entities.GroupMembership;
-import com.avdhoot.StudyGroupFinderAPI.model.entities.Member;
-import com.avdhoot.StudyGroupFinderAPI.model.entities.StudyGroup;
+import com.avdhoot.StudyGroupFinderAPI.mapper.GroupMapper;
+import com.avdhoot.StudyGroupFinderAPI.mapper.MembershipMapper;
+import com.avdhoot.StudyGroupFinderAPI.model.dto.groupDto.CreateGroupRequestDto;
+import com.avdhoot.StudyGroupFinderAPI.model.dto.groupDto.GroupResponseDto;
+import com.avdhoot.StudyGroupFinderAPI.model.dto.groupMemberDto.*;
+import com.avdhoot.StudyGroupFinderAPI.model.entity.GroupMembership;
+import com.avdhoot.StudyGroupFinderAPI.model.entity.Member;
+import com.avdhoot.StudyGroupFinderAPI.model.entity.StudyGroup;
 import com.avdhoot.StudyGroupFinderAPI.repository.groupRepository.GroupMembershipRepository;
 import com.avdhoot.StudyGroupFinderAPI.repository.groupRepository.GroupRepository;
 import com.avdhoot.StudyGroupFinderAPI.repository.MemberRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
 public class GroupService {
 
-    @Autowired
-    private GroupRepository groupRepository;
-    @Autowired
-    private MemberRepository memberRepository;
-    @Autowired
-    private GroupMembershipRepository groupMembershipRepository;
+    private final GroupRepository groupRepository;
+    private final MemberRepository memberRepository;
+    private final GroupMembershipRepository groupMembershipRepository;
+    private final GroupMapper groupMapper;
+    private final MembershipMapper membershipMapper;
 
 
-    public StudyGroup createGroup(StudyGroup studyGroup) {
-        return groupRepository.save(studyGroup);
+    public GroupResponseDto createGroup(CreateGroupRequestDto requestDto) {
+        StudyGroup studyGroup = groupMapper.toEntity(requestDto);
+        StudyGroup savedStudyGroup = groupRepository.save(studyGroup);
+
+        GroupResponseDto responseDto = groupMapper.toDto(savedStudyGroup);
+        responseDto.setMessage("Group created Successfully");
+
+        return responseDto;
     }
 
-    public List<StudyGroup> getAllGroups() {
-        return groupRepository.findAll();
+    public List<GroupResponseDto> getAllGroups() {
+        List<StudyGroup> groups = groupRepository.findAll();
+        return groupMapper.toDtoList(groups);
     }
 
-    public StudyGroup getGroupById(int id) {
-        return groupRepository.findById(id).orElse(new StudyGroup(-1));
+    public GroupResponseDto getGroupById(int groupId) {
+        StudyGroup group = getGroupOrThrow(groupId);
+        return groupMapper.toDto(group);
     }
-
-
 
     public List<GroupMemberDetailsResponse> getAllGroupMembers(int groupId) {
 
-        StudyGroup group = groupRepository.
-                findById(groupId)
-                .orElseThrow(()-> new RuntimeException("Group Not Found!"));
-
         List<GroupMembership> memberships = groupMembershipRepository.findByGroup_Id(groupId);
-        List<GroupMemberDetailsResponse> responses = new ArrayList<>();
-
-        for(GroupMembership membership : memberships){
-            GroupMemberDetailsResponse response = new GroupMemberDetailsResponse(
-                    membership.getMember().getName()
-            );
-            responses.add(response);
-        }
-
-        return responses;
+        return membershipMapper.toDtoList(memberships);
     }
 
     public JoinLeaveResponse leaveGroup(int groupId, JoinLeaveRequest request){
@@ -73,10 +69,9 @@ public class GroupService {
     }
 
     public StudyGroup updateGroup(int groupId, StudyGroup newGroupData) {
-        StudyGroup existingGroup = groupRepository.findById(groupId).orElseThrow(()->new RuntimeException("Failed Request"));
+        StudyGroup existingGroup = getGroupOrThrow(groupId);
 
-
-        // Used if statements because if used methods like model mapper it can accidentally update something which user should not
+        // Used if statements because if used methods like model groupMapper it can accidentally update something which user should not
         if (newGroupData.getName() != null) {
             existingGroup.setName(newGroupData.getName());
         }
@@ -98,7 +93,6 @@ public class GroupService {
         if (newGroupData.getMaxMembers() != null) {
             existingGroup.setMaxMembers(newGroupData.getMaxMembers());
         }
-
         return groupRepository.save(existingGroup);
     }
 
@@ -106,72 +100,46 @@ public class GroupService {
         return groupRepository.searchUsingKeyword(keyword);
     }
 
-    public  List<GroupMemberDetailsResponse> filterMemberByDate(int groupId, LocalDate startDate, Optional<LocalDate> endDate, Pageable pageable) {
-
-        StudyGroup group = groupRepository.
-                findById(groupId)
-                .orElseThrow(()-> new RuntimeException());
-
-        List<GroupMembership> groupMemberships = new ArrayList<>();
-
-        if(endDate.isEmpty()){
-            groupMemberships  = groupMembershipRepository.findByGroup_IdAndJoinedAtAfter(groupId, startDate, pageable);
-        } else{
-            groupMemberships  = groupMembershipRepository.findByGroup_IdAndJoinedAtBetween(groupId, startDate, endDate, pageable);
-        }
-
-        List<GroupMemberDetailsResponse> members = new ArrayList<>();
-
-        for(GroupMembership membership : groupMemberships){
-           GroupMemberDetailsResponse response = new GroupMemberDetailsResponse(
-                   membership.getMember().getName()
-           );
-           members.add(response);
-        }
-
-        return members;
-    }
-
-
-
-    public void joinGroup(int groupId, List<JoinLeaveRequest> request) {
-            StudyGroup group = groupRepository.
-                    findById(groupId)
-                    .orElseThrow(()-> new RuntimeException("Group Not Found!"));
+    public List<JoinLeaveResponse> joinGroup(int groupId, List<JoinLeaveRequest> request) {
+            StudyGroup group = getGroupOrThrow(groupId);
             List<Integer> memberIDs = request
                     .stream()
                     .map(JoinLeaveRequest::memberId)
                     .distinct()
                     .toList();
 
-
             List<Member> members = memberRepository.findAllById(memberIDs);
-
             if(group.getIsOpen()){
-                for(Member member : members) {
-                    if(groupMembershipRepository.existsByGroupAndMember(group, member)){
-                        continue;
-                    }
-                    GroupMembership membership = new GroupMembership();
+                List<GroupMembership> memberships = members
+                        .stream()
+                        .filter(member -> !groupMembershipRepository.existsByGroup_IdAndMember_Id(groupId, member.getId()))
+                        .map(member -> membershipMapper.createMembership(member, group))
+                        .toList();
 
-                    membership.setMember(member);
-                    membership.setGroup(group);
-                    membership.setJoinedAt(LocalDate.now());
-
-                    groupMembershipRepository.save(membership);
+                if(!memberships.isEmpty()){
+                    groupMembershipRepository.saveAll(memberships);
                 }
-
             }
-            List<JoinLeaveResponse> responses = new ArrayList<>();
+            return members
+                    .stream()
+                    .map(m-> new JoinLeaveResponse(m.getName()))
+                    .toList();
+    }
 
-        for(Member member : members) {
-            JoinLeaveResponse response = new JoinLeaveResponse(
-                    member.getName()
-            );
-            responses.add(response);
-        }
 
-//        return responses;
 
+//    public  List<GroupMemberDetailsResponse> filterMemberByDate(int groupId, LocalDate startDate, Optional<LocalDate> endDate, Pageable pageable) {
+//        StudyGroup group = getGroupOrThrow(groupId);
+//        List<GroupMembership> groupMemberships = null;
+//        if(endDate.isEmpty()){
+//            groupMemberships  = groupMembershipRepository.findByGroup_IdAndJoinedAtAfter(groupId, startDate, pageable);
+//        } else{
+//            groupMemberships  = groupMembershipRepository.findByGroup_IdAndJoinedAtBetween(groupId, startDate, endDate, pageable);
+//        }
+//        return membershipMapper.toDtoList(groupMemberships);
+//    }
+
+    private StudyGroup getGroupOrThrow(int id){
+        return groupRepository.findById(id).orElseThrow(()-> new RuntimeException("Group Not Found or does not exist"));
     }
 }

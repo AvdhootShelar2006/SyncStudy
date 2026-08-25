@@ -1,6 +1,6 @@
-package com.avdhoot.StudyGroupFinderAPI.model.dto.report_dto;
+package com.avdhoot.StudyGroupFinderAPI.model.dto.reportDto;
 
-import com.avdhoot.StudyGroupFinderAPI.model.entities.enums.ReportStatus;
+import com.avdhoot.StudyGroupFinderAPI.model.enums.ReportStatus;
 
 import java.time.LocalDateTime;
 

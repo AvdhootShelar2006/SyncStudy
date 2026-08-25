@@ -1,4 +1,4 @@
-package com.avdhoot.StudyGroupFinderAPI.model.entities.enums;
+package com.avdhoot.StudyGroupFinderAPI.model.enums;
 
 public enum ReportStatus {
     PENDING,

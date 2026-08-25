@@ -1,10 +1,10 @@
 package com.avdhoot.StudyGroupFinderAPI.controller;
 
-import com.avdhoot.StudyGroupFinderAPI.model.dto.report_dto.ReportRequest;
-import com.avdhoot.StudyGroupFinderAPI.model.dto.report_dto.ReportStatusRequest;
-import com.avdhoot.StudyGroupFinderAPI.model.dto.report_dto.ReportStatusResponse;
+import com.avdhoot.StudyGroupFinderAPI.model.dto.reportDto.ReportRequest;
+import com.avdhoot.StudyGroupFinderAPI.model.dto.reportDto.ReportStatusRequest;
+import com.avdhoot.StudyGroupFinderAPI.model.dto.reportDto.ReportStatusResponse;
 import com.avdhoot.StudyGroupFinderAPI.service.ReportService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -13,9 +13,10 @@ import java.util.List;
 
 @RestController
 @RequestMapping("groupmate")
+@RequiredArgsConstructor
 public class ReportController {
-    @Autowired
-    private ReportService service;
+
+    private final ReportService service;
 
     @PostMapping("/group/{id}/report")
     public ResponseEntity<?> groupReport(@PathVariable("id") int groupId, @RequestBody ReportRequest request){

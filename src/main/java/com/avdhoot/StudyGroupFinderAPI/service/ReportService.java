@@ -1,17 +1,17 @@
 package com.avdhoot.StudyGroupFinderAPI.service;
 
-import com.avdhoot.StudyGroupFinderAPI.model.Report;
-import com.avdhoot.StudyGroupFinderAPI.model.dto.report_dto.ReportRequest;
-import com.avdhoot.StudyGroupFinderAPI.model.dto.report_dto.ReportStatusRequest;
-import com.avdhoot.StudyGroupFinderAPI.model.dto.report_dto.ReportStatusResponse;
-import com.avdhoot.StudyGroupFinderAPI.model.entities.Member;
-import com.avdhoot.StudyGroupFinderAPI.model.entities.StudyGroup;
-import com.avdhoot.StudyGroupFinderAPI.model.entities.enums.ReportStatus;
+import com.avdhoot.StudyGroupFinderAPI.model.entity.Report;
+import com.avdhoot.StudyGroupFinderAPI.model.dto.reportDto.ReportRequest;
+import com.avdhoot.StudyGroupFinderAPI.model.dto.reportDto.ReportStatusRequest;
+import com.avdhoot.StudyGroupFinderAPI.model.dto.reportDto.ReportStatusResponse;
+import com.avdhoot.StudyGroupFinderAPI.model.entity.Member;
+import com.avdhoot.StudyGroupFinderAPI.model.entity.StudyGroup;
+import com.avdhoot.StudyGroupFinderAPI.model.enums.ReportStatus;
 import com.avdhoot.StudyGroupFinderAPI.repository.MemberRepository;
 import com.avdhoot.StudyGroupFinderAPI.repository.groupRepository.GroupMembershipRepository;
 import com.avdhoot.StudyGroupFinderAPI.repository.ReportRepository;
 import com.avdhoot.StudyGroupFinderAPI.repository.groupRepository.GroupRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -19,16 +19,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class ReportService {
 
-    @Autowired
-    private MemberRepository memberRepository;
-    @Autowired
-    private GroupMembershipRepository groupMembershipRepository;
-    @Autowired
-    private ReportRepository reportRepository;
-    @Autowired
-    private GroupRepository groupRepository;
+    private final MemberRepository memberRepository;
+    private final GroupMembershipRepository groupMembershipRepository;
+    private final ReportRepository reportRepository;
+    private final GroupRepository groupRepository;
 
     public void groupReport(int groupId, ReportRequest request) {
         Member reportedBy = memberRepository.findById(request.reportedBy())
@@ -67,7 +64,6 @@ public class ReportService {
         reportRepository.save(report);
     }
 
-
     public List<ReportStatusResponse> getReport(int groupId) {
         List<Report> reports = reportRepository.findByTargetGroupId_Id(groupId);
 
@@ -84,7 +80,6 @@ public class ReportService {
         }
         return responses;
     }
-
 
     public void updateReportStatus(int reportId, ReportStatusRequest reportStatusRequest) {
         Report report = reportRepository.findById(reportId).orElseThrow(()->new RuntimeException("Failed Report Status Upadate"));
