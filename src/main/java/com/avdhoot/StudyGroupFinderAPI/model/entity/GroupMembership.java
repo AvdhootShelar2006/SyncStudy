@@ -1,4 +1,4 @@
-package com.avdhoot.StudyGroupFinderAPI.model.entities;
+package com.avdhoot.StudyGroupFinderAPI.model.entity;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -9,6 +9,13 @@ import java.time.LocalDate;
 
 @Data
 @Entity
+@Table(
+        uniqueConstraints = {
+                @UniqueConstraint(
+                        columnNames = {"study_group_id", "member_id"} // unique combination
+                )
+        }
+)
 @NoArgsConstructor
 @AllArgsConstructor
 public class GroupMembership {

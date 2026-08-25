@@ -1,18 +1,18 @@
 package com.avdhoot.StudyGroupFinderAPI.service;
 
-import com.avdhoot.StudyGroupFinderAPI.model.dto.group_member_dto.MemberDetailsResponse;
-import com.avdhoot.StudyGroupFinderAPI.model.entities.Member;
+import com.avdhoot.StudyGroupFinderAPI.model.dto.groupMemberDto.MemberDetailsResponse;
+import com.avdhoot.StudyGroupFinderAPI.model.entity.Member;
 import com.avdhoot.StudyGroupFinderAPI.repository.MemberRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class MemberService {
 
-    @Autowired
-    private MemberRepository memberRepository;
+    private final MemberRepository memberRepository;
 
     public List<Member> addOrUpdateMember(List<Member> members) {
        return memberRepository.saveAll(members);

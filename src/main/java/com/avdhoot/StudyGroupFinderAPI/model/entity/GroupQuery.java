@@ -1,7 +1,5 @@
-package com.avdhoot.StudyGroupFinderAPI.model.interaction;
+package com.avdhoot.StudyGroupFinderAPI.model.entity;
 
-import com.avdhoot.StudyGroupFinderAPI.model.entities.Member;
-import com.avdhoot.StudyGroupFinderAPI.model.entities.StudyGroup;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;

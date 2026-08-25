@@ -1,4 +1,4 @@
-package com.avdhoot.StudyGroupFinderAPI.model.entities;
+package com.avdhoot.StudyGroupFinderAPI.model.entity;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -12,26 +12,17 @@ import java.time.LocalDate;
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
-public class StudyGroup {
-
+public class Member {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
     private String name;
-    private String subject;
-    private String field;
-    private String description;
-    private Integer maxMembers;
-    private String tags;
-    private Boolean isOpen;
+    private String email;
+    private String password;
 
     @CreationTimestamp
     @Column(updatable = false)
     private LocalDate createdAt;
 
-    private String createdBy;
-
-    public StudyGroup(int i) {
-    }
 }

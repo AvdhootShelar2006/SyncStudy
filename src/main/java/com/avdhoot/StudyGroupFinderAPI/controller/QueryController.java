@@ -1,12 +1,11 @@
 package com.avdhoot.StudyGroupFinderAPI.controller;
 
-import com.avdhoot.StudyGroupFinderAPI.model.dto.answer_query.AnswerQueryResponse;
-import com.avdhoot.StudyGroupFinderAPI.model.dto.query_dto.GroupQueryResponse;
-import com.avdhoot.StudyGroupFinderAPI.model.dto.answer_query.AnswerQueryRequest;
-import com.avdhoot.StudyGroupFinderAPI.model.dto.query_dto.QueryRequest;
-import com.avdhoot.StudyGroupFinderAPI.model.interaction.GroupQuery;
+import com.avdhoot.StudyGroupFinderAPI.model.dto.answerQuery.AnswerQueryResponse;
+import com.avdhoot.StudyGroupFinderAPI.model.dto.queryDto.GroupQueryResponse;
+import com.avdhoot.StudyGroupFinderAPI.model.dto.answerQuery.AnswerQueryRequest;
+import com.avdhoot.StudyGroupFinderAPI.model.dto.queryDto.QueryRequest;
 import com.avdhoot.StudyGroupFinderAPI.service.QueryService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,11 +13,11 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("api")
+@RequestMapping("groupmate")
+@RequiredArgsConstructor
 public class QueryController {
 
-    @Autowired
-    private QueryService queryService;
+    private final QueryService queryService;
 
     @PostMapping("/groups/{id}/queries")
     public ResponseEntity<?> createQuery(

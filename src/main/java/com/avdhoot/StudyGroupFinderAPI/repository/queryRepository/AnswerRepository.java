@@ -1,7 +1,6 @@
-package com.avdhoot.StudyGroupFinderAPI.repository;
+package com.avdhoot.StudyGroupFinderAPI.repository.queryRepository;
 
-import com.avdhoot.StudyGroupFinderAPI.model.dto.answer_query.AnswerQueryResponse;
-import com.avdhoot.StudyGroupFinderAPI.model.interaction.AnswerQuery;
+import com.avdhoot.StudyGroupFinderAPI.model.entity.AnswerQuery;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;

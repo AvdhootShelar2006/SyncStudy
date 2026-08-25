@@ -1,4 +1,4 @@
-package com.avdhoot.StudyGroupFinderAPI.model.dto.query_dto;
+package com.avdhoot.StudyGroupFinderAPI.model.dto.queryDto;
 
 public record QueryRequest(
         String title,

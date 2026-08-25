@@ -1,4 +1,4 @@
-package com.avdhoot.StudyGroupFinderAPI.model.dto.answer_query;
+package com.avdhoot.StudyGroupFinderAPI.model.dto.answerQuery;
 
 public record AnswerQueryResponse(
         String content,

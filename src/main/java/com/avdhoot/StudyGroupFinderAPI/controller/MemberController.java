@@ -1,9 +1,9 @@
 package com.avdhoot.StudyGroupFinderAPI.controller;
 
-import com.avdhoot.StudyGroupFinderAPI.model.dto.group_member_dto.MemberDetailsResponse;
-import com.avdhoot.StudyGroupFinderAPI.model.entities.Member;
+import com.avdhoot.StudyGroupFinderAPI.model.dto.groupMemberDto.MemberDetailsResponse;
+import com.avdhoot.StudyGroupFinderAPI.model.entity.Member;
 import com.avdhoot.StudyGroupFinderAPI.service.MemberService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -11,12 +11,11 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("api")
+@RequestMapping("groupmate")
+@RequiredArgsConstructor
 public class MemberController {
 
-    @Autowired
-    private MemberService memberService;
-
+    private final MemberService memberService;
 
     @GetMapping("/member/{id}")
     public ResponseEntity<MemberDetailsResponse> getMembersId(
