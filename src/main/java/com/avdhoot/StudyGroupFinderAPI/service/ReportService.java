@@ -1,12 +1,12 @@
 package com.avdhoot.StudyGroupFinderAPI.service;
 
-import com.avdhoot.StudyGroupFinderAPI.model.entity.Report;
-import com.avdhoot.StudyGroupFinderAPI.model.dto.reportDto.ReportRequest;
-import com.avdhoot.StudyGroupFinderAPI.model.dto.reportDto.ReportStatusRequest;
-import com.avdhoot.StudyGroupFinderAPI.model.dto.reportDto.ReportStatusResponse;
-import com.avdhoot.StudyGroupFinderAPI.model.entity.Member;
-import com.avdhoot.StudyGroupFinderAPI.model.entity.StudyGroup;
-import com.avdhoot.StudyGroupFinderAPI.model.enums.ReportStatus;
+import com.avdhoot.StudyGroupFinderAPI.entity.Report;
+import com.avdhoot.StudyGroupFinderAPI.dto.reportDto.ReportRequest;
+import com.avdhoot.StudyGroupFinderAPI.dto.reportDto.ReportStatusRequest;
+import com.avdhoot.StudyGroupFinderAPI.dto.reportDto.ReportStatusResponse;
+import com.avdhoot.StudyGroupFinderAPI.entity.Member;
+import com.avdhoot.StudyGroupFinderAPI.entity.StudyGroup;
+import com.avdhoot.StudyGroupFinderAPI.enums.ReportStatus;
 import com.avdhoot.StudyGroupFinderAPI.repository.MemberRepository;
 import com.avdhoot.StudyGroupFinderAPI.repository.groupRepository.GroupMembershipRepository;
 import com.avdhoot.StudyGroupFinderAPI.repository.ReportRepository;

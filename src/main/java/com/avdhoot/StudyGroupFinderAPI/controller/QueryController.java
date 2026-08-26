@@ -1,9 +1,9 @@
 package com.avdhoot.StudyGroupFinderAPI.controller;
 
-import com.avdhoot.StudyGroupFinderAPI.model.dto.answerQuery.AnswerQueryResponse;
-import com.avdhoot.StudyGroupFinderAPI.model.dto.queryDto.GroupQueryResponse;
-import com.avdhoot.StudyGroupFinderAPI.model.dto.answerQuery.AnswerQueryRequest;
-import com.avdhoot.StudyGroupFinderAPI.model.dto.queryDto.QueryRequest;
+import com.avdhoot.StudyGroupFinderAPI.dto.answerQuery.AnswerQueryResponse;
+import com.avdhoot.StudyGroupFinderAPI.dto.queryDto.GroupQueryResponse;
+import com.avdhoot.StudyGroupFinderAPI.dto.answerQuery.AnswerQueryRequest;
+import com.avdhoot.StudyGroupFinderAPI.dto.queryDto.QueryRequest;
 import com.avdhoot.StudyGroupFinderAPI.service.QueryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -19,9 +19,9 @@ public class QueryController {
 
     private final QueryService queryService;
 
-    @PostMapping("/groups/{id}/queries")
+    @PostMapping("/createQuery")
     public ResponseEntity<?> createQuery(
-            @PathVariable("id") int groupId,
+            @RequestParam int groupId,
             @RequestBody QueryRequest request
             ){
         try{
@@ -34,58 +34,49 @@ public class QueryController {
         }
     }
 
-    @GetMapping("/groups/{id}/queries")
+    @GetMapping("/queries")
     public ResponseEntity<List<GroupQueryResponse>> getAllGroupQueries(
-            @PathVariable("id") Integer groupId
+            @RequestParam Integer groupId
     ){
-
-        List<GroupQueryResponse> queries = queryService.getAllGroupQueris(groupId);
-
+        List<GroupQueryResponse> queries = queryService.getAllGroupQueries(groupId);
         return new ResponseEntity<>(queries, HttpStatus.FOUND);
     }
 
-    @GetMapping("/groups/{id}/queries/{qId}")
+    @GetMapping("/groupQuery")
     public ResponseEntity<GroupQueryResponse> getGroupQuery(
-            @PathVariable("qId") int qId,
-            @PathVariable("id") int groupId
+            @RequestParam int queryId,
+            @RequestParam int groupId
     ) {
-
-        GroupQueryResponse queryById = queryService.getGroupQuery(qId, groupId);
-
+        GroupQueryResponse queryById = queryService.getGroupQuery(queryId, groupId);
         return new ResponseEntity<>(queryById , HttpStatus.FOUND);
     }
 
-    @PatchMapping("/groups/{id}/queries/{qId}/resolve")
+    @PatchMapping("/resolve")
     public ResponseEntity<GroupQueryResponse> resolveQuery(
-            @PathVariable("qId") int qId,
-            @PathVariable("id") int groupId
+           @RequestParam int queryId,
+           @RequestParam int groupId
     ) {
-
-        GroupQueryResponse queryById = queryService.resolveGroupQuery(qId, groupId);
-
+        GroupQueryResponse queryById = queryService.resolveGroupQuery(queryId, groupId);
         return new ResponseEntity<>(queryById , HttpStatus.OK);
     }
 
     // Answer Query
-
-    @PostMapping("/groups/{id}/queries/{qId}/answers")
+    @PostMapping("/solutions")
     public ResponseEntity<AnswerQueryResponse> answerQuery(
-            @PathVariable("id") int groupId,
-            @PathVariable("qId") int queryId,
+            @RequestParam int groupId,
+            @RequestParam int queryId,
             @RequestBody AnswerQueryRequest request){
 
         AnswerQueryResponse response = queryService.answerQuery(groupId, queryId,request);
-
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @GetMapping("/groups/{id}/queries/{qId}/answers")
+    @GetMapping("/solutions")
     public ResponseEntity<List<AnswerQueryResponse>> getAllSolutions(
-            @PathVariable("id") int groupId,
-            @PathVariable("qId") int queryId
+            @RequestParam int groupId,
+            @RequestParam int queryId
     ){
         List<AnswerQueryResponse> answerQueries = queryService.getAllSolutions(groupId, queryId);
-
         return new ResponseEntity<>(answerQueries, HttpStatus.FOUND);
     }
 }

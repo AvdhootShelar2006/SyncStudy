@@ -1,8 +1,8 @@
 package com.avdhoot.StudyGroupFinderAPI.controller;
 
-import com.avdhoot.StudyGroupFinderAPI.model.dto.reportDto.ReportRequest;
-import com.avdhoot.StudyGroupFinderAPI.model.dto.reportDto.ReportStatusRequest;
-import com.avdhoot.StudyGroupFinderAPI.model.dto.reportDto.ReportStatusResponse;
+import com.avdhoot.StudyGroupFinderAPI.dto.reportDto.ReportRequest;
+import com.avdhoot.StudyGroupFinderAPI.dto.reportDto.ReportStatusRequest;
+import com.avdhoot.StudyGroupFinderAPI.dto.reportDto.ReportStatusResponse;
 import com.avdhoot.StudyGroupFinderAPI.service.ReportService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -20,8 +20,6 @@ public class ReportController {
 
     @PostMapping("/group/{id}/report")
     public ResponseEntity<?> groupReport(@PathVariable("id") int groupId, @RequestBody ReportRequest request){
-//        List<ReportStatusResponse> responses = service.groupReport(groupId, request);;
-
         service.groupReport(groupId, request);
         return new ResponseEntity<>( HttpStatus.CREATED);
     }

@@ -1,23 +1,22 @@
 package com.avdhoot.StudyGroupFinderAPI.service;
 
+import com.avdhoot.StudyGroupFinderAPI.dto.groupMemberDto.GroupMemberDetailsResponse;
+import com.avdhoot.StudyGroupFinderAPI.dto.groupMemberDto.JoinLeaveRequest;
+import com.avdhoot.StudyGroupFinderAPI.dto.groupMemberDto.JoinLeaveResponse;
 import com.avdhoot.StudyGroupFinderAPI.mapper.GroupMapper;
 import com.avdhoot.StudyGroupFinderAPI.mapper.MembershipMapper;
-import com.avdhoot.StudyGroupFinderAPI.model.dto.groupDto.CreateGroupRequestDto;
-import com.avdhoot.StudyGroupFinderAPI.model.dto.groupDto.GroupResponseDto;
-import com.avdhoot.StudyGroupFinderAPI.model.dto.groupMemberDto.*;
-import com.avdhoot.StudyGroupFinderAPI.model.entity.GroupMembership;
-import com.avdhoot.StudyGroupFinderAPI.model.entity.Member;
-import com.avdhoot.StudyGroupFinderAPI.model.entity.StudyGroup;
+import com.avdhoot.StudyGroupFinderAPI.dto.groupDto.CreateGroupRequestDto;
+import com.avdhoot.StudyGroupFinderAPI.dto.groupDto.GroupResponseDto;
+import com.avdhoot.StudyGroupFinderAPI.entity.GroupMembership;
+import com.avdhoot.StudyGroupFinderAPI.entity.Member;
+import com.avdhoot.StudyGroupFinderAPI.entity.StudyGroup;
 import com.avdhoot.StudyGroupFinderAPI.repository.groupRepository.GroupMembershipRepository;
 import com.avdhoot.StudyGroupFinderAPI.repository.groupRepository.GroupRepository;
 import com.avdhoot.StudyGroupFinderAPI.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.data.domain.Pageable;
 
-import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -32,10 +31,11 @@ public class GroupService {
 
     public GroupResponseDto createGroup(CreateGroupRequestDto requestDto) {
         StudyGroup studyGroup = groupMapper.toEntity(requestDto);
-        StudyGroup savedStudyGroup = groupRepository.save(studyGroup);
+        StudyGroup savedStudyGroup = new StudyGroup();
+        savedStudyGroup.setIsOpen(true);
+        groupRepository.save(studyGroup);
 
         GroupResponseDto responseDto = groupMapper.toDto(savedStudyGroup);
-        responseDto.setMessage("Group created Successfully");
 
         return responseDto;
     }
@@ -126,20 +126,11 @@ public class GroupService {
                     .toList();
     }
 
-
-
-//    public  List<GroupMemberDetailsResponse> filterMemberByDate(int groupId, LocalDate startDate, Optional<LocalDate> endDate, Pageable pageable) {
-//        StudyGroup group = getGroupOrThrow(groupId);
-//        List<GroupMembership> groupMemberships = null;
-//        if(endDate.isEmpty()){
-//            groupMemberships  = groupMembershipRepository.findByGroup_IdAndJoinedAtAfter(groupId, startDate, pageable);
-//        } else{
-//            groupMemberships  = groupMembershipRepository.findByGroup_IdAndJoinedAtBetween(groupId, startDate, endDate, pageable);
-//        }
-//        return membershipMapper.toDtoList(groupMemberships);
-//    }
-
     private StudyGroup getGroupOrThrow(int id){
         return groupRepository.findById(id).orElseThrow(()-> new RuntimeException("Group Not Found or does not exist"));
+    }
+
+    private boolean exitsByName(StudyGroup group){
+        return groupRepository.existsByName(group.getName());
     }
 }

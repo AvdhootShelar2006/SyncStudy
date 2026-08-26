@@ -1,9 +1,9 @@
 package com.avdhoot.StudyGroupFinderAPI.mapper;
 
-import com.avdhoot.StudyGroupFinderAPI.model.dto.groupMemberDto.GroupMemberDetailsResponse;
-import com.avdhoot.StudyGroupFinderAPI.model.entity.GroupMembership;
-import com.avdhoot.StudyGroupFinderAPI.model.entity.Member;
-import com.avdhoot.StudyGroupFinderAPI.model.entity.StudyGroup;
+import com.avdhoot.StudyGroupFinderAPI.dto.groupMemberDto.GroupMemberDetailsResponse;
+import com.avdhoot.StudyGroupFinderAPI.entity.GroupMembership;
+import com.avdhoot.StudyGroupFinderAPI.entity.Member;
+import com.avdhoot.StudyGroupFinderAPI.entity.StudyGroup;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 

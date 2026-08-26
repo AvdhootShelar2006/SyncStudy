@@ -1,13 +1,11 @@
 package com.avdhoot.StudyGroupFinderAPI.repository.groupRepository;
 
-import com.avdhoot.StudyGroupFinderAPI.model.entity.GroupMembership;
-import com.avdhoot.StudyGroupFinderAPI.model.entity.Member;
-import com.avdhoot.StudyGroupFinderAPI.model.entity.StudyGroup;
+import com.avdhoot.StudyGroupFinderAPI.entity.GroupMembership;
+import com.avdhoot.StudyGroupFinderAPI.entity.Member;
+import com.avdhoot.StudyGroupFinderAPI.entity.StudyGroup;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import org.springframework.data.domain.Pageable;
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 

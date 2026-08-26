@@ -1,8 +1,8 @@
 package com.avdhoot.StudyGroupFinderAPI.mapper;
 
-import com.avdhoot.StudyGroupFinderAPI.model.dto.groupDto.CreateGroupRequestDto;
-import com.avdhoot.StudyGroupFinderAPI.model.dto.groupDto.GroupResponseDto;
-import com.avdhoot.StudyGroupFinderAPI.model.entity.StudyGroup;
+import com.avdhoot.StudyGroupFinderAPI.dto.groupDto.CreateGroupRequestDto;
+import com.avdhoot.StudyGroupFinderAPI.dto.groupDto.GroupResponseDto;
+import com.avdhoot.StudyGroupFinderAPI.entity.StudyGroup;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
@@ -12,7 +12,6 @@ import java.util.List;
 public interface GroupMapper {
     StudyGroup toEntity(CreateGroupRequestDto dto);
 
-    @Mapping(target = "message", ignore = true)
     GroupResponseDto toDto(StudyGroup studyGroup);
 
     List<GroupResponseDto> toDtoList(List<StudyGroup> studyGroup);

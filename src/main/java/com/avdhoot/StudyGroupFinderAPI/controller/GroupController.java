@@ -1,20 +1,18 @@
 package com.avdhoot.StudyGroupFinderAPI.controller;
 
-import com.avdhoot.StudyGroupFinderAPI.model.dto.groupDto.CreateGroupRequestDto;
-import com.avdhoot.StudyGroupFinderAPI.model.dto.groupDto.GroupResponseDto;
-import com.avdhoot.StudyGroupFinderAPI.model.dto.groupMemberDto.*;
-import com.avdhoot.StudyGroupFinderAPI.model.entity.StudyGroup;
+import com.avdhoot.StudyGroupFinderAPI.dto.groupDto.CreateGroupRequestDto;
+import com.avdhoot.StudyGroupFinderAPI.dto.groupDto.GroupResponseDto;
+import com.avdhoot.StudyGroupFinderAPI.dto.groupMemberDto.GroupMemberDetailsResponse;
+import com.avdhoot.StudyGroupFinderAPI.dto.groupMemberDto.JoinLeaveRequest;
+import com.avdhoot.StudyGroupFinderAPI.dto.groupMemberDto.JoinLeaveResponse;
+import com.avdhoot.StudyGroupFinderAPI.entity.StudyGroup;
 import com.avdhoot.StudyGroupFinderAPI.service.GroupService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import org.springframework.data.domain.Pageable;
-import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("groupmate")

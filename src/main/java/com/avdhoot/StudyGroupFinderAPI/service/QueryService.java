@@ -1,13 +1,14 @@
 package com.avdhoot.StudyGroupFinderAPI.service;
 
-import com.avdhoot.StudyGroupFinderAPI.model.dto.answerQuery.AnswerQueryRequest;
-import com.avdhoot.StudyGroupFinderAPI.model.dto.answerQuery.AnswerQueryResponse;
-import com.avdhoot.StudyGroupFinderAPI.model.dto.queryDto.QueryRequest;
-import com.avdhoot.StudyGroupFinderAPI.model.entity.Member;
-import com.avdhoot.StudyGroupFinderAPI.model.entity.StudyGroup;
-import com.avdhoot.StudyGroupFinderAPI.model.dto.queryDto.GroupQueryResponse;
-import com.avdhoot.StudyGroupFinderAPI.model.entity.AnswerQuery;
-import com.avdhoot.StudyGroupFinderAPI.model.entity.GroupQuery;
+import com.avdhoot.StudyGroupFinderAPI.mapper.QueryMapper;
+import com.avdhoot.StudyGroupFinderAPI.dto.answerQuery.AnswerQueryRequest;
+import com.avdhoot.StudyGroupFinderAPI.dto.answerQuery.AnswerQueryResponse;
+import com.avdhoot.StudyGroupFinderAPI.dto.queryDto.QueryRequest;
+import com.avdhoot.StudyGroupFinderAPI.entity.Member;
+import com.avdhoot.StudyGroupFinderAPI.entity.StudyGroup;
+import com.avdhoot.StudyGroupFinderAPI.dto.queryDto.GroupQueryResponse;
+import com.avdhoot.StudyGroupFinderAPI.entity.AnswerQuery;
+import com.avdhoot.StudyGroupFinderAPI.entity.GroupQuery;
 import com.avdhoot.StudyGroupFinderAPI.repository.groupRepository.GroupMembershipRepository;
 import com.avdhoot.StudyGroupFinderAPI.repository.queryRepository.AnswerRepository;
 import com.avdhoot.StudyGroupFinderAPI.repository.queryRepository.GroupQueryRepository;
@@ -17,7 +18,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -29,157 +29,82 @@ public class QueryService {
     private final MemberRepository memberRepository;
     private final AnswerRepository answerRepository;
     private final GroupMembershipRepository groupMembershipRepository;
-
-    /*
-
-    public void createQuery(GroupQuery inputQuery) {
-        Integer memberId = inputQuery.getPostedBy().getId();
-        Integer groupId = inputQuery.getStudyGroup().getId();
-
-        StudyGroup group = groupRepository.findById(groupId).orElseThrow(() -> new RuntimeException("Group Not Found"));
-
-        Member realMember = memberRepository.findById(memberId).orElseThrow(() -> new RuntimeException("Invalid Member"));
-
-        inputQuery.setStudyGroup(group);
-        inputQuery.setPostedBy(realMember);
-
-        groupQueryRepository.save(inputQuery);
-    }
-    */
-
-    public List<GroupQueryResponse> getAllGroupQueris(Integer groupId) {
-
-        StudyGroup group = groupRepository
-                .findById(groupId)
-                .orElseThrow(() -> new RuntimeException("404"));
-
-        List<GroupQueryResponse> responses = new ArrayList<>();
-
-        List<GroupQuery> queries = groupQueryRepository.findByStudyGroup_Id(groupId);
-
-        for(GroupQuery query : queries){
-            GroupQueryResponse response = new GroupQueryResponse(
-                    query.getTitle(),
-                    query.getDescription(),
-                    query.getPostedBy().getName(),
-                    query.getStudyGroup().getId(),
-                    query.isResolved()
-            );
-            responses.add(response);
-        }
-        return responses;
-    }
-
-    public GroupQueryResponse getGroupQuery(int qId, int groupId) {
-        StudyGroup group = groupRepository
-                .findById(groupId)
-                .orElseThrow(() -> new RuntimeException("404"));
-
-        GroupQuery query = groupQueryRepository.findById(qId)
-                .orElseThrow(() -> new RuntimeException("Query Not Found!!"));
-
-        GroupQueryResponse response = new GroupQueryResponse(
-                query.getTitle(),
-                query.getDescription(),
-                query.getPostedBy().getName(),
-                query.getStudyGroup().getId(),
-                query.isResolved());
-        return response;
-    }
-
-    public GroupQueryResponse resolveGroupQuery(int qId, int groupId) {
-
-        StudyGroup group = groupRepository
-                .findById(groupId)
-                .orElseThrow(() -> new RuntimeException("404"));
-
-        GroupQuery query = groupQueryRepository.findById(qId)
-                .orElseThrow(() -> new RuntimeException("Query Not Found!!"));
-        query.setResolved(true);
-
-        GroupQueryResponse response = new GroupQueryResponse(
-                query.getTitle(),
-                query.getDescription(),
-                query.getPostedBy().getName(),
-                query.getStudyGroup().getId(),
-                query.isResolved());
-
-        groupQueryRepository.save(query);
-        return response;
-    }
-
-    public AnswerQueryResponse answerQuery(int groupId,int queryId, AnswerQueryRequest request) {
-
-        StudyGroup group = groupRepository
-                .findById(groupId)
-                .orElseThrow(() -> new RuntimeException("Group Not Found"));
-
-        GroupQuery groupQuery = groupQueryRepository
-                .findById(queryId)
-                .orElseThrow(()-> new RuntimeException(("Query does not exist")));
-
-        Member member = memberRepository
-                .findById(request.memberId())
-                .orElseThrow(()-> new RuntimeException("Member Not Found! (404)"));
-
-        AnswerQuery answerQuery = new AnswerQuery();
-        answerQuery.setContent(request.content());
-        answerQuery.setUser(member);
-        answerQuery.setGroupQuery(groupQuery);
-        answerQuery.setStudyGroup(group);
-        answerQuery.setCreatedAt(LocalDate.now());
+    private final QueryMapper queryMapper;
 
 
-        answerRepository.save(answerQuery);
-
-        return new AnswerQueryResponse(
-                answerQuery.getContent(),
-                member.getName(),
-                groupQuery.getTitle()
-        );
-    }
-
-    public List<AnswerQueryResponse> getAllSolutions(int groupId, int queryId) {
-
-        StudyGroup group = groupRepository
-                .findById(groupId)
-                .orElseThrow(() -> new RuntimeException("Group Not Found"));
-
-        GroupQuery groupQuery = groupQueryRepository
-                .findById(queryId)
-                .orElseThrow(()-> new RuntimeException(("Query does not exist")));
-
-        List<AnswerQuery> queries = answerRepository.findSolutions(groupId, queryId);
-
-        List<AnswerQueryResponse> responses = new ArrayList<>();
-
-        for( AnswerQuery query : queries){
-            AnswerQueryResponse queryResponse = new AnswerQueryResponse(
-                    query.getContent(),
-                    groupQuery.getPostedBy().getName(),
-                    groupQuery.getTitle()
-            );
-            responses.add(queryResponse);
-        }
-        return responses;
-    }
 
     public void postQuery(int groupId, QueryRequest request) {
         Member member = memberRepository.findById(request.memberId()).orElseThrow();
         StudyGroup group = groupRepository.findById(groupId).orElseThrow();
 
-            if(groupMembershipRepository.existsByGroupAndMember(group, member)) {
-            GroupQuery newQuery = new GroupQuery();
-
-            newQuery.setTitle(request.title());
-            newQuery.setDescription(request.description());
-            newQuery.setResolved(false);
-            newQuery.setCreatedAt(LocalDate.now());
-            newQuery.setPostedBy(member);
-            newQuery.setStudyGroup(group);
-
+        if(groupMembershipRepository.existsByGroupAndMember(group, member)) {
+            GroupQuery newQuery = GroupQuery
+                    .builder()
+                    .title(request.title())
+                    .description(request.description())
+                    .postedBy(member)
+                    .studyGroup(group)
+                    .isResolved(false)
+                    .createdAt(LocalDate.now()).build();
             groupQueryRepository.save(newQuery);
         }
+    }
+
+    public List<GroupQueryResponse> getAllGroupQueries(Integer groupId) {
+        getGroupOrThrow(groupId);
+        List<GroupQuery> queries = groupQueryRepository.findByStudyGroup_Id(groupId);
+        return queryMapper.toGroupQueryResponses(queries);
+    }
+
+    public GroupQueryResponse getGroupQuery(int queryId, int groupId) {
+        GroupQuery query = getQueryInGroupOrThrow(queryId, groupId);
+        return queryMapper.toGroupQueryResponse(query);
+    }
+
+    public GroupQueryResponse resolveGroupQuery(int queryId, int groupId) {
+        GroupQuery query = getQueryInGroupOrThrow(queryId, groupId);
+        query.setResolved(true);
+        groupQueryRepository.save(query);
+        return queryMapper.toGroupQueryResponse(query);
+    }
+
+    public AnswerQueryResponse answerQuery(int groupId,int queryId, AnswerQueryRequest request) {
+
+        StudyGroup group = getGroupOrThrow(groupId);
+        GroupQuery groupQuery = getQueryInGroupOrThrow(queryId, groupId);
+        Member member = memberRepository.findById(request.memberId())
+                .orElseThrow(() -> new RuntimeException("Member Not Found! (404)"));
+        AnswerQuery answerQuery = AnswerQuery
+                .builder()
+                .content(request.content())
+                .user(member)
+                .groupQuery(groupQuery)
+                .studyGroup(group).createdAt(LocalDate.now())
+                .build();
+        answerRepository.save(answerQuery);
+        return queryMapper.toAnswerQueryResponse(answerQuery);
+    }
+
+    public List<AnswerQueryResponse> getAllSolutions(int groupId, int queryId) {
+        getGroupOrThrow(groupId);
+        getQueryInGroupOrThrow(queryId, groupId);
+        List<AnswerQuery> answerQueries = answerRepository.findSolutions(groupId, queryId);
+        return queryMapper.toAnswerQueryResponses(answerQueries);
+    }
+
+
+    private StudyGroup getGroupOrThrow(int groupId) {
+        return groupRepository.findById(groupId)
+                .orElseThrow(() -> new RuntimeException("Group Not Found"));
+    }
+
+    private GroupQuery getQueryInGroupOrThrow(int queryId, int groupId) {
+        GroupQuery query = groupQueryRepository.findById(queryId)
+                .orElseThrow(() -> new RuntimeException("Query Not Found!!"));
+        if (!query.getStudyGroup().getId().equals(groupId)) {
+            throw new RuntimeException("Query does not belong to this group");
+        }
+        return query;
     }
 }
 
