@@ -1,7 +1,7 @@
 package com.avdhoot.StudyGroupFinderAPI.repository.groupRepository;
 
-import com.avdhoot.StudyGroupFinderAPI.model.entity.StudyGroup;
-import com.avdhoot.StudyGroupFinderAPI.model.entity.GroupQuery;
+import com.avdhoot.StudyGroupFinderAPI.entity.StudyGroup;
+import com.avdhoot.StudyGroupFinderAPI.entity.GroupQuery;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -21,4 +21,6 @@ public interface GroupRepository extends JpaRepository<StudyGroup, Integer> {
             "lower(g.description) like lower(concat('%', :keyword, '%')) or " +
             "lower(g.tags) like lower(concat('%', :keyword, '%'))")
     List<StudyGroup> searchUsingKeyword(@Param("keyword") String keyword);
+
+    boolean existsByName(String name);
 }

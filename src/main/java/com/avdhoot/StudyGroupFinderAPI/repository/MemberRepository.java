@@ -1,6 +1,6 @@
 package com.avdhoot.StudyGroupFinderAPI.repository;
 
-import com.avdhoot.StudyGroupFinderAPI.model.entity.Member;
+import com.avdhoot.StudyGroupFinderAPI.entity.Member;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
