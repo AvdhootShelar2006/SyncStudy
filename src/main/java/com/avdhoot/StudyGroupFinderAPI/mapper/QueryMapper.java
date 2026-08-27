@@ -1,7 +1,7 @@
 package com.avdhoot.StudyGroupFinderAPI.mapper;
 
 import com.avdhoot.StudyGroupFinderAPI.dto.answerQuery.AnswerQueryResponse;
-import com.avdhoot.StudyGroupFinderAPI.dto.queryDto.GroupQueryResponse;
+import com.avdhoot.StudyGroupFinderAPI.dto.queryDto.CreateQueryResponse;
 import com.avdhoot.StudyGroupFinderAPI.entity.AnswerQuery;
 import com.avdhoot.StudyGroupFinderAPI.entity.GroupQuery;
 import org.mapstruct.Mapper;
@@ -14,12 +14,12 @@ public interface QueryMapper {
 
     @Mapping(source = "postedBy.name", target = "postedByName")
     @Mapping(source = "studyGroup.id", target = "groupId")
-    GroupQueryResponse toGroupQueryResponse(GroupQuery query);
+    CreateQueryResponse toCreateQueryResponse(GroupQuery query);
 
 
     @Mapping(source = "studyGroup.id", target = "groupId")
     @Mapping(source = "postedBy.name", target = "postedByName")
-    List<GroupQueryResponse> toGroupQueryResponses(List<GroupQuery> groupQueries);
+    List<CreateQueryResponse> toCreateQueryResponses(List<GroupQuery> groupQueries);
 
 
     @Mapping(source = "user.name", target = "answeredByName")

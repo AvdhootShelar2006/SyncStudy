@@ -1,8 +1,11 @@
 package com.avdhoot.StudyGroupFinderAPI.service;
 
-import com.avdhoot.StudyGroupFinderAPI.dto.groupMemberDto.GroupMemberDetailsResponse;
-import com.avdhoot.StudyGroupFinderAPI.dto.groupMemberDto.JoinLeaveRequest;
-import com.avdhoot.StudyGroupFinderAPI.dto.groupMemberDto.JoinLeaveResponse;
+import com.avdhoot.StudyGroupFinderAPI.dto.groupDto.UpdateGroupRequestDto;
+import com.avdhoot.StudyGroupFinderAPI.dto.groupMemberDto.*;
+import com.avdhoot.StudyGroupFinderAPI.exception.AlreadyExistsException;
+import com.avdhoot.StudyGroupFinderAPI.exception.DuplicateResourceException;
+import com.avdhoot.StudyGroupFinderAPI.exception.EntityAndRelationshipsFinder;
+import com.avdhoot.StudyGroupFinderAPI.exception.ResourceNotFoundException;
 import com.avdhoot.StudyGroupFinderAPI.mapper.GroupMapper;
 import com.avdhoot.StudyGroupFinderAPI.mapper.MembershipMapper;
 import com.avdhoot.StudyGroupFinderAPI.dto.groupDto.CreateGroupRequestDto;
@@ -16,6 +19,7 @@ import com.avdhoot.StudyGroupFinderAPI.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -27,110 +31,111 @@ public class GroupService {
     private final GroupMembershipRepository groupMembershipRepository;
     private final GroupMapper groupMapper;
     private final MembershipMapper membershipMapper;
-
+    private final EntityAndRelationshipsFinder entityRelationshipsFinder;
 
     public GroupResponseDto createGroup(CreateGroupRequestDto requestDto) {
         StudyGroup studyGroup = groupMapper.toEntity(requestDto);
+
+        if(groupRepository.existsByName(studyGroup.getName())){
+            throw new DuplicateResourceException("Group with name: " + studyGroup.getName() + " already exist.");
+        }
         StudyGroup savedStudyGroup = new StudyGroup();
         savedStudyGroup.setIsOpen(true);
-        groupRepository.save(studyGroup);
+        groupRepository.save(savedStudyGroup);
 
-        GroupResponseDto responseDto = groupMapper.toDto(savedStudyGroup);
+        GroupResponseDto responseDto = groupMapper.toGroupResponseDto(savedStudyGroup);
+
+        return responseDto;
+    }
+
+    public GroupResponseDto updateGroup(int groupId, UpdateGroupRequestDto updateGroup) {
+        StudyGroup existingGroup = entityRelationshipsFinder.getGroupOrThrow(groupId);
+
+        // Used if statements because if used methods like model groupMapper it can accidentally update something which user should not
+        if (updateGroup.name() != null) {
+            existingGroup.setName(updateGroup.name());
+        }
+        if (updateGroup.subject() != null) {
+            existingGroup.setSubject(updateGroup.subject());
+        }
+        if (updateGroup.field() != null) {
+            existingGroup.setField(updateGroup.field());
+        }
+        if (updateGroup.description() != null) {
+            existingGroup.setDescription(updateGroup.description());
+        }
+        if (updateGroup.tags() != null) {
+            String existingTags = existingGroup.getTags() + ","+ updateGroup.tags();
+            existingGroup.setTags(existingTags);
+        }
+        if (updateGroup.maxMembers() != null) {
+            existingGroup.setMaxMembers(updateGroup.maxMembers());
+        }
+
+        GroupResponseDto responseDto = groupMapper.toGroupResponseDto(existingGroup);
+        groupRepository.save(existingGroup);
 
         return responseDto;
     }
 
     public List<GroupResponseDto> getAllGroups() {
         List<StudyGroup> groups = groupRepository.findAll();
-        return groupMapper.toDtoList(groups);
+        return groupMapper.toGroupResponseDtoList(groups);
     }
 
     public GroupResponseDto getGroupById(int groupId) {
-        StudyGroup group = getGroupOrThrow(groupId);
-        return groupMapper.toDto(group);
+        StudyGroup group = entityRelationshipsFinder.getGroupOrThrow(groupId);
+        return groupMapper.toGroupResponseDto(group);
     }
 
     public List<GroupMemberDetailsResponse> getAllGroupMembers(int groupId) {
+        entityRelationshipsFinder.getGroupOrThrow(groupId);
 
         List<GroupMembership> memberships = groupMembershipRepository.findByGroup_Id(groupId);
-        return membershipMapper.toDtoList(memberships);
+
+        return membershipMapper.toGroupMemberDetailsResponses(memberships);
     }
 
-    public JoinLeaveResponse leaveGroup(int groupId, JoinLeaveRequest request){
-            int memberId = request.memberId();
+    public LeaveResponseDto leaveGroup(int groupId, LeaveRequestDto request){
+            Member member = entityRelationshipsFinder.getMemberOrThrow(request.memberId());
+            StudyGroup group = entityRelationshipsFinder.getGroupOrThrow(groupId);
 
             GroupMembership membership = groupMembershipRepository
-                    .findByGroup_IdAndMember_Id(groupId, memberId)
-                    .orElseThrow(() -> new RuntimeException("This member is not in this group!"));
+                    .findByGroup_IdAndMember_Id(group.getId(), member.getId())
+                    .orElseThrow(() -> new ResourceNotFoundException("This member is not in this group!"));
 
             groupMembershipRepository.delete(membership);
 
-            return new JoinLeaveResponse("Left Group Gracefully");
-    }
-
-    public StudyGroup updateGroup(int groupId, StudyGroup newGroupData) {
-        StudyGroup existingGroup = getGroupOrThrow(groupId);
-
-        // Used if statements because if used methods like model groupMapper it can accidentally update something which user should not
-        if (newGroupData.getName() != null) {
-            existingGroup.setName(newGroupData.getName());
-        }
-        if (newGroupData.getSubject() != null) {
-            existingGroup.setSubject(newGroupData.getSubject());
-        }
-        if (newGroupData.getField() != null) {
-            existingGroup.setField(newGroupData.getField());
-        }
-        if (newGroupData.getDescription() != null) {
-            existingGroup.setDescription(newGroupData.getDescription());
-        }
-        if (newGroupData.getTags() != null) {
-            existingGroup.setTags(newGroupData.getTags());
-        }
-        if (newGroupData.getIsOpen() != null) {
-            existingGroup.setIsOpen(newGroupData.getIsOpen());
-        }
-        if (newGroupData.getMaxMembers() != null) {
-            existingGroup.setMaxMembers(newGroupData.getMaxMembers());
-        }
-        return groupRepository.save(existingGroup);
+            LeaveResponseDto leaveResponse = new  LeaveResponseDto(
+                    member.getId(),
+                    member.getName(),
+                    group.getId(),
+                    LocalDateTime.now()
+            );
+        return leaveResponse;
     }
 
     public List<StudyGroup> searchGroups(String keyword) {
         return groupRepository.searchUsingKeyword(keyword);
     }
 
-    public List<JoinLeaveResponse> joinGroup(int groupId, List<JoinLeaveRequest> request) {
-            StudyGroup group = getGroupOrThrow(groupId);
-            List<Integer> memberIDs = request
-                    .stream()
-                    .map(JoinLeaveRequest::memberId)
-                    .distinct()
-                    .toList();
+    public JoinGroupResponse joinGroup(int groupId, JoinGroupRequest request) {
+        StudyGroup group = entityRelationshipsFinder.getGroupOrThrow(groupId);
+        Member member = entityRelationshipsFinder.getMemberOrThrow(request.memberId());
 
-            List<Member> members = memberRepository.findAllById(memberIDs);
-            if(group.getIsOpen()){
-                List<GroupMembership> memberships = members
-                        .stream()
-                        .filter(member -> !groupMembershipRepository.existsByGroup_IdAndMember_Id(groupId, member.getId()))
-                        .map(member -> membershipMapper.createMembership(member, group))
-                        .toList();
+        if(groupMembershipRepository.existsByGroup_IdAndMember_Id(group.getId(), member.getId())){
+            throw new AlreadyExistsException("Member with id: " + member.getId() + " already exists in the group");
+        }
 
-                if(!memberships.isEmpty()){
-                    groupMembershipRepository.saveAll(memberships);
-                }
-            }
-            return members
-                    .stream()
-                    .map(m-> new JoinLeaveResponse(m.getName()))
-                    .toList();
-    }
+        GroupMembership groupMembership = membershipMapper.createMembership(member, group);
+        groupMembershipRepository.save(groupMembership);
 
-    private StudyGroup getGroupOrThrow(int id){
-        return groupRepository.findById(id).orElseThrow(()-> new RuntimeException("Group Not Found or does not exist"));
-    }
-
-    private boolean exitsByName(StudyGroup group){
-        return groupRepository.existsByName(group.getName());
+        JoinGroupResponse joinGroupResponse = new JoinGroupResponse(
+                member.getId(),
+                member.getName(),
+                group.getId(),
+                groupMembership.getJoinedAt()
+        );
+        return joinGroupResponse;
     }
 }

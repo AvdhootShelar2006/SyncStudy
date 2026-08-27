@@ -12,7 +12,7 @@ import java.util.List;
 public interface GroupMapper {
     StudyGroup toEntity(CreateGroupRequestDto dto);
 
-    GroupResponseDto toDto(StudyGroup studyGroup);
+    GroupResponseDto toGroupResponseDto(StudyGroup studyGroup);
 
-    List<GroupResponseDto> toDtoList(List<StudyGroup> studyGroup);
+    List<GroupResponseDto> toGroupResponseDtoList(List<StudyGroup> studyGroup);
 }
