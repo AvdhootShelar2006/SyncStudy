@@ -1,12 +1,14 @@
 package com.avdhoot.StudyGroupFinderAPI.service;
 
+import com.avdhoot.StudyGroupFinderAPI.exception.EntityAndRelationshipsFinder;
+import com.avdhoot.StudyGroupFinderAPI.exception.ResourceNotFoundException;
 import com.avdhoot.StudyGroupFinderAPI.mapper.QueryMapper;
 import com.avdhoot.StudyGroupFinderAPI.dto.answerQuery.AnswerQueryRequest;
 import com.avdhoot.StudyGroupFinderAPI.dto.answerQuery.AnswerQueryResponse;
-import com.avdhoot.StudyGroupFinderAPI.dto.queryDto.QueryRequest;
+import com.avdhoot.StudyGroupFinderAPI.dto.queryDto.CreateQueryRequest;
 import com.avdhoot.StudyGroupFinderAPI.entity.Member;
 import com.avdhoot.StudyGroupFinderAPI.entity.StudyGroup;
-import com.avdhoot.StudyGroupFinderAPI.dto.queryDto.GroupQueryResponse;
+import com.avdhoot.StudyGroupFinderAPI.dto.queryDto.CreateQueryResponse;
 import com.avdhoot.StudyGroupFinderAPI.entity.AnswerQuery;
 import com.avdhoot.StudyGroupFinderAPI.entity.GroupQuery;
 import com.avdhoot.StudyGroupFinderAPI.repository.groupRepository.GroupMembershipRepository;
@@ -30,42 +32,45 @@ public class QueryService {
     private final AnswerRepository answerRepository;
     private final GroupMembershipRepository groupMembershipRepository;
     private final QueryMapper queryMapper;
+    private final EntityAndRelationshipsFinder entityAndRelationshipsFinder;
 
 
+    public CreateQueryResponse postQuery(int groupId, CreateQueryRequest request) {
+        Member member = entityAndRelationshipsFinder.getMemberOrThrow(request.memberId());
+        StudyGroup group = entityAndRelationshipsFinder.getGroupOrThrow(groupId);
 
-    public void postQuery(int groupId, QueryRequest request) {
-        Member member = memberRepository.findById(request.memberId()).orElseThrow();
-        StudyGroup group = groupRepository.findById(groupId).orElseThrow();
-
-        if(groupMembershipRepository.existsByGroupAndMember(group, member)) {
-            GroupQuery newQuery = GroupQuery
-                    .builder()
-                    .title(request.title())
-                    .description(request.description())
-                    .postedBy(member)
-                    .studyGroup(group)
-                    .isResolved(false)
-                    .createdAt(LocalDate.now()).build();
-            groupQueryRepository.save(newQuery);
+        if(!groupMembershipRepository.existsByGroupAndMember(group, member)) {
+            throw  new ResourceNotFoundException(" Member with ID:" + member.getId() + " does not belong to "+ group.getName()+" group.");
         }
+        GroupQuery newQuery = GroupQuery
+                .builder()
+                .title(request.title())
+                .description(request.description())
+                .postedBy(member)
+                .studyGroup(group)
+                .isResolved(false)
+                .createdAt(LocalDate.now()).build();
+        groupQueryRepository.save(newQuery);
+
+        return queryMapper.toCreateQueryResponse(newQuery);
     }
 
-    public List<GroupQueryResponse> getAllGroupQueries(Integer groupId) {
+    public List<CreateQueryResponse> getAllGroupQueries(Integer groupId) {
         getGroupOrThrow(groupId);
         List<GroupQuery> queries = groupQueryRepository.findByStudyGroup_Id(groupId);
-        return queryMapper.toGroupQueryResponses(queries);
+        return queryMapper.toCreateQueryResponses(queries);
     }
 
-    public GroupQueryResponse getGroupQuery(int queryId, int groupId) {
+    public CreateQueryResponse getGroupQuery(int queryId, int groupId) {
         GroupQuery query = getQueryInGroupOrThrow(queryId, groupId);
-        return queryMapper.toGroupQueryResponse(query);
+        return queryMapper.toCreateQueryResponse(query);
     }
 
-    public GroupQueryResponse resolveGroupQuery(int queryId, int groupId) {
+    public CreateQueryResponse resolveGroupQuery(int queryId, int groupId) {
         GroupQuery query = getQueryInGroupOrThrow(queryId, groupId);
         query.setResolved(true);
         groupQueryRepository.save(query);
-        return queryMapper.toGroupQueryResponse(query);
+        return queryMapper.toCreateQueryResponse(query);
     }
 
     public AnswerQueryResponse answerQuery(int groupId,int queryId, AnswerQueryRequest request) {

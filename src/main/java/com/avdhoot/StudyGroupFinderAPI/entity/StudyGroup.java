@@ -1,15 +1,15 @@
 package com.avdhoot.StudyGroupFinderAPI.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDate;
 
-@Data
+@Getter
+@Setter
 @Entity
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class StudyGroup {

@@ -1,10 +1,11 @@
 package com.avdhoot.StudyGroupFinderAPI.controller;
 
 import com.avdhoot.StudyGroupFinderAPI.dto.answerQuery.AnswerQueryResponse;
-import com.avdhoot.StudyGroupFinderAPI.dto.queryDto.GroupQueryResponse;
+import com.avdhoot.StudyGroupFinderAPI.dto.queryDto.CreateQueryResponse;
 import com.avdhoot.StudyGroupFinderAPI.dto.answerQuery.AnswerQueryRequest;
-import com.avdhoot.StudyGroupFinderAPI.dto.queryDto.QueryRequest;
+import com.avdhoot.StudyGroupFinderAPI.dto.queryDto.CreateQueryRequest;
 import com.avdhoot.StudyGroupFinderAPI.service.QueryService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,68 +14,62 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("groupmate")
+@RequestMapping("api")
 @RequiredArgsConstructor
 public class QueryController {
 
     private final QueryService queryService;
 
-    @PostMapping("/createQuery")
-    public ResponseEntity<?> createQuery(
-            @RequestParam int groupId,
-            @RequestBody QueryRequest request
+    @PostMapping("/groups/{groupId}/queries")
+    public ResponseEntity<CreateQueryResponse> createQuery(
+           @PathVariable("groupId") Integer groupId,
+           @Valid @RequestBody CreateQueryRequest request
             ){
-        try{
-            queryService.postQuery(groupId, request);
-            return new ResponseEntity<>( HttpStatus.CREATED);
-        }
-        catch (Exception e){
-            System.out.println(e.getLocalizedMessage());
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+        CreateQueryResponse response = queryService.postQuery(groupId, request);
+        return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/queries")
-    public ResponseEntity<List<GroupQueryResponse>> getAllGroupQueries(
-            @RequestParam Integer groupId
+    @GetMapping("/groups/{groupId}/queries")
+    public ResponseEntity<List<CreateQueryResponse>> getAllGroupQueries(
+            @PathVariable("groupId") Integer groupId
     ){
-        List<GroupQueryResponse> queries = queryService.getAllGroupQueries(groupId);
+        List<CreateQueryResponse> queries = queryService.getAllGroupQueries(groupId);
         return new ResponseEntity<>(queries, HttpStatus.FOUND);
     }
 
-    @GetMapping("/groupQuery")
-    public ResponseEntity<GroupQueryResponse> getGroupQuery(
-            @RequestParam int queryId,
-            @RequestParam int groupId
+    @GetMapping("/groups/{groupId}/queries/{queryId}")
+    public ResponseEntity<CreateQueryResponse> getGroupQuery(
+            @PathVariable("groupId") Integer groupId,
+            @PathVariable("queryId") Integer queryId
     ) {
-        GroupQueryResponse queryById = queryService.getGroupQuery(queryId, groupId);
+        CreateQueryResponse queryById = queryService.getGroupQuery(queryId, groupId);
         return new ResponseEntity<>(queryById , HttpStatus.FOUND);
     }
 
-    @PatchMapping("/resolve")
-    public ResponseEntity<GroupQueryResponse> resolveQuery(
-           @RequestParam int queryId,
-           @RequestParam int groupId
+    @PatchMapping("/groups/{groupId}/queries/{queryId}/resolve")
+    public ResponseEntity<CreateQueryResponse> resolveQuery(
+           @PathVariable("groupId") Integer groupId,
+           @PathVariable("queryId") Integer queryId
     ) {
-        GroupQueryResponse queryById = queryService.resolveGroupQuery(queryId, groupId);
+        CreateQueryResponse queryById = queryService.resolveGroupQuery(queryId, groupId);
         return new ResponseEntity<>(queryById , HttpStatus.OK);
     }
 
     // Answer Query
-    @PostMapping("/solutions")
+    @PostMapping("/groups/{groupId}/queries/{queryId}/solutions")
     public ResponseEntity<AnswerQueryResponse> answerQuery(
-            @RequestParam int groupId,
-            @RequestParam int queryId,
-            @RequestBody AnswerQueryRequest request){
+            @PathVariable("groupId") Integer groupId,
+            @PathVariable("queryId") Integer queryId,
+            @Valid @RequestBody AnswerQueryRequest request){
 
         AnswerQueryResponse response = queryService.answerQuery(groupId, queryId,request);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @GetMapping("/solutions")
+    @GetMapping("/groups/{groupId}/queries/{queryId}/solutions")
     public ResponseEntity<List<AnswerQueryResponse>> getAllSolutions(
-            @RequestParam int groupId,
-            @RequestParam int queryId
+            @PathVariable("groupId") Integer groupId,
+            @PathVariable("queryId") Integer queryId
     ){
         List<AnswerQueryResponse> answerQueries = queryService.getAllSolutions(groupId, queryId);
         return new ResponseEntity<>(answerQueries, HttpStatus.FOUND);

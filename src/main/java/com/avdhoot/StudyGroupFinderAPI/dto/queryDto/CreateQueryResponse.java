@@ -1,6 +1,6 @@
 package com.avdhoot.StudyGroupFinderAPI.dto.queryDto;
 
-public record GroupQueryResponse(
+public record CreateQueryResponse(
          String title,
          String description,
          String postedByName,

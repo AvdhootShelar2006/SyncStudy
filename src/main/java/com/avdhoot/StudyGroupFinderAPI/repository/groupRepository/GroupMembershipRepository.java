@@ -15,10 +15,6 @@ public interface GroupMembershipRepository extends JpaRepository<GroupMembership
 
     Optional<GroupMembership> findByGroup_IdAndMember_Id(int groupId, int memberId);
 
-//    List<GroupMembership> findByGroup_IdAndJoinedAtAfter(int groupId, LocalDate startDate, Pageable pageable);
-//
-//    List<GroupMembership> findByGroup_IdAndJoinedAtBetween(int groupId, LocalDate startDate, Optional<LocalDate> endDate, Pageable pageable);
-
     boolean existsByGroup_IdAndMember_Id(int groupId, int i);
 
     boolean existsByGroupAndMember(StudyGroup group, Member member);

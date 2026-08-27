@@ -2,14 +2,14 @@ package com.avdhoot.StudyGroupFinderAPI.entity;
 
 import com.avdhoot.StudyGroupFinderAPI.enums.ReportStatus;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
-@Data
+@Getter
+@Setter
 @Entity
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class Report {
@@ -26,7 +26,7 @@ public class Report {
 
     @ManyToOne
     @JoinColumn(name = "target_member_id")
-    private Member targetMemberId;
+    private Member targetMember;
     private String reason;
 
     @Enumerated(EnumType.STRING)

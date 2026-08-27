@@ -1,6 +1,6 @@
 package com.avdhoot.StudyGroupFinderAPI.dto.groupMemberDto;
 
-public record JoinLeaveRequest(
-        int memberId
+public record LeaveRequestDto(
+        Integer memberId
 ) {
 }

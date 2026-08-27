@@ -12,10 +12,12 @@ import java.util.List;
 @Mapper(componentModel = "spring")
 public interface MembershipMapper {
 
+    @Mapping(source = "member.id", target = "memberId")
     @Mapping(source = "member.name", target = "name")
-    GroupMemberDetailsResponse toDto(GroupMembership groupMemberships);
+    GroupMemberDetailsResponse toGroupMemberDetailsResponse(GroupMembership groupMemberships);
 
-    List<GroupMemberDetailsResponse> toDtoList(List<GroupMembership> groupMemberships);
+
+    List<GroupMemberDetailsResponse> toGroupMemberDetailsResponses(List<GroupMembership> groupMemberships);
 
     @Mapping(target = "id", ignore = true)
     @Mapping(source = "member", target = "member")
