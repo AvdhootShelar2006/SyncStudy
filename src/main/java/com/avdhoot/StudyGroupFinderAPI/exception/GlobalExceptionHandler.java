@@ -2,6 +2,7 @@ package com.avdhoot.StudyGroupFinderAPI.exception;
 
 import com.avdhoot.StudyGroupFinderAPI.dto.exceptionDto.ExceptionResponseDto;
 import com.avdhoot.StudyGroupFinderAPI.dto.exceptionDto.ValidationExceptionResponseDto;
+import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,18 +17,18 @@ import java.util.Map;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(ResourceNotFoundException.class)
+    @ExceptionHandler
     public ResponseEntity<ExceptionResponseDto> handleResourceNotFoundException(
             ResourceNotFoundException exception,
             HttpServletRequest request
     ){
-        ExceptionResponseDto exceptionResponse = new ExceptionResponseDto(
-                LocalDateTime.now(),
-                HttpStatus.NOT_FOUND.value(),
-                HttpStatus.NOT_FOUND.getReasonPhrase(),
-                exception.getMessage(),
-                request.getRequestURI()
-        );
+        ExceptionResponseDto exceptionResponse = new  ExceptionResponseDto(
+              LocalDateTime.now(),
+              HttpStatus.NOT_FOUND.value(),
+              HttpStatus.NOT_FOUND.getReasonPhrase(),
+              exception.getMessage(),
+              request.getRequestURI()
+      );
 
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(exceptionResponse);
     }

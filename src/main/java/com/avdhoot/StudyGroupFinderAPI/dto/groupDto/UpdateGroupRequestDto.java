@@ -15,7 +15,7 @@ public record UpdateGroupRequestDto(
         @Size(max = 1000, message = "Description must not exceed 1000 characters")
         String description,
 
-        @Min(value = 1, message = "Group must have at least 1 member")
+        @Min(value = 1, message = "Group must have at least 1 user")
         Integer maxMembers,
 
         String tags

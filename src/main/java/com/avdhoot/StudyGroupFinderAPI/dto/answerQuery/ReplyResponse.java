@@ -1,6 +1,6 @@
 package com.avdhoot.StudyGroupFinderAPI.dto.answerQuery;
 
-public record AnswerQueryResponse(
+public record ReplyResponse(
         String content,
         String answeredByName,
         String queryTitle

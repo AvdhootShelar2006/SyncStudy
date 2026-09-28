@@ -1,9 +1,11 @@
 package com.avdhoot.StudyGroupFinderAPI.exception;
 
-import com.avdhoot.StudyGroupFinderAPI.entity.Member;
-import com.avdhoot.StudyGroupFinderAPI.entity.StudyGroup;
-import com.avdhoot.StudyGroupFinderAPI.repository.MemberRepository;
+import com.avdhoot.StudyGroupFinderAPI.entity.Query;
+import com.avdhoot.StudyGroupFinderAPI.entity.User;
+import com.avdhoot.StudyGroupFinderAPI.entity.Group;
+import com.avdhoot.StudyGroupFinderAPI.repository.UserRepository;
 import com.avdhoot.StudyGroupFinderAPI.repository.groupRepository.GroupRepository;
+import com.avdhoot.StudyGroupFinderAPI.repository.queryRepository.GroupQueryRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -12,14 +14,24 @@ import org.springframework.stereotype.Component;
 public class EntityAndRelationshipsFinder {
 
     private final GroupRepository groupRepository;
-    private final MemberRepository memberRepository;
+    private final UserRepository userRepository;
+    private final GroupQueryRepository groupQueryRepository;
 
-    public StudyGroup getGroupOrThrow(Integer groupId){
-        return groupRepository.findById(groupId).orElseThrow(()-> new ResourceNotFoundException("Group with id " + groupId + " not found."));
+    public Group getGroupOrThrow(Integer groupId){
+        return groupRepository.findById(groupId).orElseThrow(()-> new ResourceNotFoundException("Group with ID: " + groupId + " not found."));
     }
 
-    public Member getMemberOrThrow(Integer memberId){
-        return memberRepository.findById(memberId).orElseThrow(()-> new ResourceNotFoundException("Member with id " + memberId + " not found."));
+    public User getMemberOrThrow(Integer memberId){
+        return userRepository.findById(memberId).orElseThrow(()-> new ResourceNotFoundException("User with ID: " + memberId + " not found."));
     }
 
+    public Query getQueryInGroupOrThrow(int queryId, int groupId) {
+        Query query = groupQueryRepository.findById(queryId)
+                .orElseThrow(() -> new ResourceNotFoundException("Query with ID: " + queryId + " not found"));
+
+        if (!query.getGroup().getId().equals(groupId)) {
+            throw new ResourceNotFoundException("Group with ID: " + groupId + " does not contain this query");
+        }
+        return query;
+    }
 }

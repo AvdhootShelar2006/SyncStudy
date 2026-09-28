@@ -11,28 +11,28 @@ import java.time.LocalDate;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class AnswerQuery {
+public class Reply {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer answerId;
+    private Integer replyId;
 
     @Column(columnDefinition = "TEXT")
     private String content;
 
     @ManyToOne
     @JoinColumn(name = "user_id")
-    private Member user;
+    private User user;
 
     // to which query this answer belongs
     @ManyToOne
     @JoinColumn(name = "query_id")
-    private GroupQuery groupQuery;
+    private Query query;
 
 
     // to which group this answer query belongs
     @ManyToOne
     @JoinColumn(name = "group_id")
-    private StudyGroup studyGroup;
+    private Group group;
     private LocalDate createdAt;
 }
 
@@ -42,6 +42,6 @@ public class AnswerQuery {
    → id
    → content
    → answeredBy (student)
-   → query (which GroupQuery)
+   → query (which Query)
    → createdAt
    * */

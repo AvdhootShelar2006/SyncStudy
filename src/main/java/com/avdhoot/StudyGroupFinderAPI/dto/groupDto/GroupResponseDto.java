@@ -1,6 +1,5 @@
 package com.avdhoot.StudyGroupFinderAPI.dto.groupDto;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 
 public record GroupResponseDto(
         String name,

@@ -12,17 +12,27 @@ import java.time.LocalDate;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Member {
+@Table(name = "community_group_table")
+public class Group {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
+    @Column(nullable = false, unique = true)
     private String name;
-    private String email;
-    private String password;
+    private String subject;
+    private String field;
+    private String description;
+    private Integer maxMembers;
+    private String tags;
+    private Boolean isOpen;
 
     @CreationTimestamp
     @Column(updatable = false)
     private LocalDate createdAt;
+
+    @Column(name = "group_admin")
+    private String createdBy;
 
 }

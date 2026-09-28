@@ -1,22 +1,25 @@
 package com.avdhoot.StudyGroupFinderAPI.repository.groupRepository;
 
 import com.avdhoot.StudyGroupFinderAPI.entity.GroupMembership;
-import com.avdhoot.StudyGroupFinderAPI.entity.Member;
-import com.avdhoot.StudyGroupFinderAPI.entity.StudyGroup;
+import com.avdhoot.StudyGroupFinderAPI.entity.User;
+import com.avdhoot.StudyGroupFinderAPI.entity.Group;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
 import java.util.Optional;
 
 @Repository
 public interface GroupMembershipRepository extends JpaRepository<GroupMembership, Integer> {
-    List<GroupMembership> findByGroup_Id(int groupId);
+  
 
-    Optional<GroupMembership> findByGroup_IdAndMember_Id(int groupId, int memberId);
 
-    boolean existsByGroup_IdAndMember_Id(int groupId, int i);
+    boolean existsByGroupAndUser(Group group, User user);
 
-    boolean existsByGroupAndMember(StudyGroup group, Member member);
+    Page<GroupMembership> findByGroup_Id(Pageable pageable, int groupId);
 
+    boolean existsByGroup_IdAndUser_Id(Integer id, Integer id1);
+
+    Optional<GroupMembership> findByGroup_IdAndUser_Id(Integer id, Integer id1);
 }

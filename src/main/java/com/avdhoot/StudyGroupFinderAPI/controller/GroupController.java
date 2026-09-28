@@ -4,10 +4,13 @@ import com.avdhoot.StudyGroupFinderAPI.dto.groupDto.CreateGroupRequestDto;
 import com.avdhoot.StudyGroupFinderAPI.dto.groupDto.GroupResponseDto;
 import com.avdhoot.StudyGroupFinderAPI.dto.groupDto.UpdateGroupRequestDto;
 import com.avdhoot.StudyGroupFinderAPI.dto.groupMemberDto.*;
-import com.avdhoot.StudyGroupFinderAPI.entity.StudyGroup;
+import com.avdhoot.StudyGroupFinderAPI.entity.Group;
 import com.avdhoot.StudyGroupFinderAPI.service.GroupService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -19,67 +22,102 @@ import java.util.List;
 @RequiredArgsConstructor
 public class GroupController {
 
-    private final GroupService service;
+    private final GroupService groupService;
 
-    // Create Group
+    /*
+        Create Group
+     */
     @PostMapping("/groups")
     public ResponseEntity<GroupResponseDto> createGroup(
             @Valid @RequestBody CreateGroupRequestDto requestDto
     ){
-            GroupResponseDto groupResponseDto = service.createGroup(requestDto);
+            GroupResponseDto groupResponseDto = groupService.createGroup(requestDto);
             return ResponseEntity
                     .status(HttpStatus.CREATED)
                     .body(groupResponseDto);
     }
 
+
+    /*
+        Update Groups
+     */
     @PatchMapping("/groups/{groupId}")
     public ResponseEntity<GroupResponseDto> updateGroup(
             @PathVariable("groupId") Integer groupId,
             @Valid @RequestBody UpdateGroupRequestDto updateGroup
     ){
-        return ResponseEntity.ok(service.updateGroup(groupId, updateGroup));
+        return ResponseEntity.ok(groupService.updateGroup(groupId, updateGroup));
     }
 
+
+    /*
+        Get All the Groups
+    */
     @GetMapping("/groups")
-    public ResponseEntity<List<GroupResponseDto>> getAllGroups(){
-        return new ResponseEntity<>(service.getAllGroups(), HttpStatus.OK);
+    public ResponseEntity<Page<GroupResponseDto>> getAllGroups(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ){
+        Pageable pageable = PageRequest.of(page, size);
+        Page<GroupResponseDto> response = groupService.getAllGroups(pageable);
+
+        return ResponseEntity.ok(response);
     }
 
+
+    /*
+        Get Group By Id
+     */
     @GetMapping("/groups/{groupId}")
     public ResponseEntity<GroupResponseDto> getGroupById(@PathVariable("groupId") Integer groupId){
-        return ResponseEntity.ok(service.getGroupById(groupId));
+        return ResponseEntity.ok(groupService.getGroupById(groupId));
     }
 
+    /*
+        Join Group
+     */
     @PostMapping("/groups/{groupId}/join")
     public ResponseEntity <JoinGroupResponse> joinGroup(
             @PathVariable("groupId") Integer groupId,
             @RequestBody JoinGroupRequest request
     ){
-        return new ResponseEntity<>(service.joinGroup(groupId, request), HttpStatus.CREATED);
+        return new ResponseEntity<>(groupService.joinGroup(groupId, request), HttpStatus.CREATED);
     }
 
-    // Get All Members
+    /*
+        Get All Members
+     */
     @GetMapping("/groups/{groupId}/members")
-    public ResponseEntity<List<GroupMemberDetailsResponse>> getAllGroupMembers(
+    public ResponseEntity<Page<GroupMemberDetailsResponse>> getAllGroupMembers(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
             @PathVariable("groupId") int groupId ){
-        List<GroupMemberDetailsResponse> allMembers = service.getAllGroupMembers(groupId);
+
+        Pageable pageable = PageRequest.of(page, size);
+
+        Page<GroupMemberDetailsResponse> allMembers = groupService.getAllGroupMembers(pageable,groupId);
+
         return new ResponseEntity<>(allMembers,HttpStatus.OK);
     }
 
-    // Leave Group
+    /*
+        Leave Group
+     */
     @DeleteMapping("/groups/{groupId}/leave")
     public ResponseEntity<LeaveResponseDto> leaveGroup(
             @PathVariable("groupId") Integer groupId,
             @RequestBody LeaveRequestDto request
     ){
-        LeaveResponseDto response = service.leaveGroup(groupId, request);
+        LeaveResponseDto response = groupService.leaveGroup(groupId, request);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    // Search By Keyword
+    /*
+        Search By Keyword
+     */
     @GetMapping("/groups/search")
-    public ResponseEntity<List<StudyGroup>> search(@RequestParam String keyword){
-        List<StudyGroup> groups = service.searchGroups(keyword);
+    public ResponseEntity<List<Group>> search(@RequestParam String keyword){
+        List<Group> groups = groupService.searchGroups(keyword);
         System.out.println("Searching with " + keyword);
         return new ResponseEntity<>(groups, HttpStatus.FOUND);
     }
