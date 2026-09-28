@@ -10,6 +10,10 @@ public record CreateMemberRequestDto (
         @Size(min = 2, max = 70, message = "Name must be between 2 and 70 characters")
         String name,
 
+        @NotBlank(message = "Username is required")
+        @Size(min = 2, max = 70, message = "Username must be between 2 and 70 characters")
+        String username,
+
         @NotBlank(message = "Email is required")
         @Email(message = "Please provide a valid email address")
         String email,

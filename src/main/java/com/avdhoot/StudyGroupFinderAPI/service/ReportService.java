@@ -4,21 +4,20 @@ import com.avdhoot.StudyGroupFinderAPI.entity.Report;
 import com.avdhoot.StudyGroupFinderAPI.dto.reportDto.ReportRequest;
 import com.avdhoot.StudyGroupFinderAPI.dto.reportDto.ReportStatusRequest;
 import com.avdhoot.StudyGroupFinderAPI.dto.reportDto.ReportStatusResponse;
-import com.avdhoot.StudyGroupFinderAPI.entity.Member;
-import com.avdhoot.StudyGroupFinderAPI.entity.StudyGroup;
+import com.avdhoot.StudyGroupFinderAPI.entity.User;
+import com.avdhoot.StudyGroupFinderAPI.entity.Group;
 import com.avdhoot.StudyGroupFinderAPI.enums.ReportStatus;
 import com.avdhoot.StudyGroupFinderAPI.exception.EntityAndRelationshipsFinder;
 import com.avdhoot.StudyGroupFinderAPI.exception.ResourceNotFoundException;
 import com.avdhoot.StudyGroupFinderAPI.mapper.ReportMapper;
-import com.avdhoot.StudyGroupFinderAPI.repository.MemberRepository;
 import com.avdhoot.StudyGroupFinderAPI.repository.groupRepository.GroupMembershipRepository;
 import com.avdhoot.StudyGroupFinderAPI.repository.ReportRepository;
-import com.avdhoot.StudyGroupFinderAPI.repository.groupRepository.GroupRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -31,21 +30,21 @@ public class ReportService {
     private final EntityAndRelationshipsFinder entityAndRelationshipsFinder;
 
     public void createReport(int groupId, ReportRequest request) {
-        Member reportedBy = entityAndRelationshipsFinder.getMemberOrThrow(request.reportedBy());
-        Member targetMember = entityAndRelationshipsFinder.getMemberOrThrow(request.targetMember());
-        StudyGroup group = entityAndRelationshipsFinder.getGroupOrThrow(groupId);
+        User reportedBy = entityAndRelationshipsFinder.getMemberOrThrow(request.reportedBy());
+        User targetUser = entityAndRelationshipsFinder.getMemberOrThrow(request.targetMember());
+        Group group = entityAndRelationshipsFinder.getGroupOrThrow(groupId);
 
-        if(!groupMembershipRepository.existsByGroupAndMember(group, reportedBy)){
+        if(!groupMembershipRepository.existsByGroupAndUser(group, reportedBy)){
             throw new ResourceNotFoundException(reportedBy.getName() + " is not the part of the group");
         }
-        if(!groupMembershipRepository.existsByGroupAndMember(group, targetMember)){
-            throw new ResourceNotFoundException(targetMember.getName() + " is not the part of the group");
+        if(!groupMembershipRepository.existsByGroupAndUser(group, targetUser)){
+            throw new ResourceNotFoundException(targetUser.getName() + " is not the part of the group");
         }
 
         Report report = Report
                 .builder()
                 .reportedBy(reportedBy)
-                .targetMember(targetMember)
+                .targetUser(targetUser)
                 .reason(request.reason())
                 .status(ReportStatus.PENDING)
                 .reportedTime(LocalDateTime.now())
@@ -55,9 +54,10 @@ public class ReportService {
         reportRepository.save(report);
     }
 
-    public List<ReportStatusResponse> getAllReport(int groupId) {
-        List<Report> reports = reportRepository.findByTargetGroupId_Id(groupId);
-        return reportMapper.toListReportStatusResponse(reports);
+    public Page<ReportStatusResponse> getAllReport(int groupId, Pageable pageable) {
+        Page<Report> reports = reportRepository.findByTargetGroupId_Id(groupId, pageable);
+
+        return reports.map(reportMapper::toReportStatusResponse);
     }
 
     public void updateReportStatus(int reportId, ReportStatusRequest reportStatusRequest) {

@@ -18,15 +18,15 @@ public class Report {
 
     @ManyToOne
     @JoinColumn(name = "Reported_By")
-    private Member reportedBy;
+    private User reportedBy;
 
     @ManyToOne
     @JoinColumn(name="target_Group_Id")
-    private StudyGroup targetGroupId;
+    private Group targetGroupId;
 
     @ManyToOne
     @JoinColumn(name = "target_member_id")
-    private Member targetMember;
+    private User targetUser;
     private String reason;
 
     @Enumerated(EnumType.STRING)

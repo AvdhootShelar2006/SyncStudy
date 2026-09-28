@@ -11,7 +11,7 @@ import java.time.LocalDate;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class GroupQuery {
+public class Query {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -21,12 +21,12 @@ public class GroupQuery {
     private String description;
 
     @ManyToOne
-    @JoinColumn(name = "member_id")
-    private Member postedBy;
+    @JoinColumn(name = "user_id")
+    private User postedBy;
 
     @ManyToOne
     @JoinColumn(name = "group_id")
-    private StudyGroup studyGroup;
+    private Group group;
 
     private boolean isResolved;
     private LocalDate createdAt;

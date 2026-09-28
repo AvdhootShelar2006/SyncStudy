@@ -2,6 +2,7 @@ package com.avdhoot.StudyGroupFinderAPI.service;
 
 import com.avdhoot.StudyGroupFinderAPI.dto.groupDto.UpdateGroupRequestDto;
 import com.avdhoot.StudyGroupFinderAPI.dto.groupMemberDto.*;
+import com.avdhoot.StudyGroupFinderAPI.entity.Group;
 import com.avdhoot.StudyGroupFinderAPI.exception.AlreadyExistsException;
 import com.avdhoot.StudyGroupFinderAPI.exception.DuplicateResourceException;
 import com.avdhoot.StudyGroupFinderAPI.exception.EntityAndRelationshipsFinder;
@@ -11,12 +12,13 @@ import com.avdhoot.StudyGroupFinderAPI.mapper.MembershipMapper;
 import com.avdhoot.StudyGroupFinderAPI.dto.groupDto.CreateGroupRequestDto;
 import com.avdhoot.StudyGroupFinderAPI.dto.groupDto.GroupResponseDto;
 import com.avdhoot.StudyGroupFinderAPI.entity.GroupMembership;
-import com.avdhoot.StudyGroupFinderAPI.entity.Member;
-import com.avdhoot.StudyGroupFinderAPI.entity.StudyGroup;
+import com.avdhoot.StudyGroupFinderAPI.entity.User;
 import com.avdhoot.StudyGroupFinderAPI.repository.groupRepository.GroupMembershipRepository;
 import com.avdhoot.StudyGroupFinderAPI.repository.groupRepository.GroupRepository;
-import com.avdhoot.StudyGroupFinderAPI.repository.MemberRepository;
+import com.avdhoot.StudyGroupFinderAPI.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -27,29 +29,27 @@ import java.util.List;
 public class GroupService {
 
     private final GroupRepository groupRepository;
-    private final MemberRepository memberRepository;
     private final GroupMembershipRepository groupMembershipRepository;
     private final GroupMapper groupMapper;
     private final MembershipMapper membershipMapper;
     private final EntityAndRelationshipsFinder entityRelationshipsFinder;
 
     public GroupResponseDto createGroup(CreateGroupRequestDto requestDto) {
-        StudyGroup studyGroup = groupMapper.toEntity(requestDto);
+        Group group = groupMapper.toEntity(requestDto);
 
-        if(groupRepository.existsByName(studyGroup.getName())){
-            throw new DuplicateResourceException("Group with name: " + studyGroup.getName() + " already exist.");
+        if(groupRepository.existsByName(group.getName())){
+            throw new DuplicateResourceException("Group with name: " + group.getName() + " already exist.");
         }
-        StudyGroup savedStudyGroup = new StudyGroup();
-        savedStudyGroup.setIsOpen(true);
-        groupRepository.save(savedStudyGroup);
+        group.setIsOpen(true);
+        groupRepository.save(group);
 
-        GroupResponseDto responseDto = groupMapper.toGroupResponseDto(savedStudyGroup);
+        GroupResponseDto responseDto = groupMapper.toGroupResponseDto(group);
 
         return responseDto;
     }
 
     public GroupResponseDto updateGroup(int groupId, UpdateGroupRequestDto updateGroup) {
-        StudyGroup existingGroup = entityRelationshipsFinder.getGroupOrThrow(groupId);
+        Group existingGroup = entityRelationshipsFinder.getGroupOrThrow(groupId);
 
         // Used if statements because if used methods like model groupMapper it can accidentally update something which user should not
         if (updateGroup.name() != null) {
@@ -78,61 +78,67 @@ public class GroupService {
         return responseDto;
     }
 
-    public List<GroupResponseDto> getAllGroups() {
-        List<StudyGroup> groups = groupRepository.findAll();
-        return groupMapper.toGroupResponseDtoList(groups);
+    public Page<GroupResponseDto> getAllGroups(Pageable pageable) {
+
+        Page<Group> groups = groupRepository.findAll(pageable);
+
+        return groups.map(groupMapper::toGroupResponseDto);
     }
 
     public GroupResponseDto getGroupById(int groupId) {
-        StudyGroup group = entityRelationshipsFinder.getGroupOrThrow(groupId);
+        Group group = entityRelationshipsFinder.getGroupOrThrow(groupId);
         return groupMapper.toGroupResponseDto(group);
     }
 
-    public List<GroupMemberDetailsResponse> getAllGroupMembers(int groupId) {
+    public Page<GroupMemberDetailsResponse> getAllGroupMembers(Pageable pageable, int groupId) {
         entityRelationshipsFinder.getGroupOrThrow(groupId);
 
-        List<GroupMembership> memberships = groupMembershipRepository.findByGroup_Id(groupId);
+        Page<GroupMembership> memberships = groupMembershipRepository.findByGroup_Id(pageable,groupId);
 
-        return membershipMapper.toGroupMemberDetailsResponses(memberships);
+        return memberships.map(membershipMapper::toGroupMemberDetailsResponse);
     }
 
     public LeaveResponseDto leaveGroup(int groupId, LeaveRequestDto request){
-            Member member = entityRelationshipsFinder.getMemberOrThrow(request.memberId());
-            StudyGroup group = entityRelationshipsFinder.getGroupOrThrow(groupId);
+            User user = entityRelationshipsFinder.getMemberOrThrow(request.memberId());
+            Group group = entityRelationshipsFinder.getGroupOrThrow(groupId);
 
             GroupMembership membership = groupMembershipRepository
-                    .findByGroup_IdAndMember_Id(group.getId(), member.getId())
-                    .orElseThrow(() -> new ResourceNotFoundException("This member is not in this group!"));
+                    .findByGroup_IdAndUser_Id(group.getId(), user.getId())
+                    .orElseThrow(
+                            ()->new ResourceNotFoundException("User with Id: " + user.getId() +" no longer part of the Group")
+                    );
 
             groupMembershipRepository.delete(membership);
 
             LeaveResponseDto leaveResponse = new  LeaveResponseDto(
-                    member.getId(),
-                    member.getName(),
+                    user.getId(),
+                    user.getName(),
                     group.getId(),
                     LocalDateTime.now()
             );
         return leaveResponse;
     }
 
-    public List<StudyGroup> searchGroups(String keyword) {
+    public List<Group> searchGroups(String keyword) {
         return groupRepository.searchUsingKeyword(keyword);
     }
 
     public JoinGroupResponse joinGroup(int groupId, JoinGroupRequest request) {
-        StudyGroup group = entityRelationshipsFinder.getGroupOrThrow(groupId);
-        Member member = entityRelationshipsFinder.getMemberOrThrow(request.memberId());
 
-        if(groupMembershipRepository.existsByGroup_IdAndMember_Id(group.getId(), member.getId())){
-            throw new AlreadyExistsException("Member with id: " + member.getId() + " already exists in the group");
+        Group group = entityRelationshipsFinder.getGroupOrThrow(groupId);
+
+        User user = entityRelationshipsFinder.getMemberOrThrow(request.memberId());
+
+        if(groupMembershipRepository.existsByGroup_IdAndUser_Id(group.getId(), user.getId())){
+            throw new AlreadyExistsException("User with id: " + user.getId() + " already exists in the group");
         }
 
-        GroupMembership groupMembership = membershipMapper.createMembership(member, group);
+        GroupMembership groupMembership = membershipMapper.createMembership(user, group);
         groupMembershipRepository.save(groupMembership);
 
         JoinGroupResponse joinGroupResponse = new JoinGroupResponse(
-                member.getId(),
-                member.getName(),
+                user.getId(),
+                user.getName(),
                 group.getId(),
                 groupMembership.getJoinedAt()
         );

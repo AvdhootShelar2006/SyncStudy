@@ -10,8 +10,8 @@ import java.util.List;
 @Mapper(componentModel = "spring")
 public interface ReportMapper {
 
-    @Mapping(source = "targetMember.id", target = "targetMemberId")
+    @Mapping(source = "targetUser.id", target = "targetMemberId")
     ReportStatusResponse toReportStatusResponse(Report report);
 
-    List<ReportStatusResponse> toListReportStatusResponse(List<Report> reports);
+//    List<ReportStatusResponse> toListReportStatusResponse(List<Report> reports);
 }

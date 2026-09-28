@@ -21,7 +21,7 @@ public record CreateGroupRequestDto (
         String description,
 
         @NotNull(message = "Maximum number of members is required")
-        @Min(value = 1, message = "Group must have at least 1 member")
+        @Min(value = 1, message = "Group must have at least 1 user")
         Integer maxMembers,
 
         String tags

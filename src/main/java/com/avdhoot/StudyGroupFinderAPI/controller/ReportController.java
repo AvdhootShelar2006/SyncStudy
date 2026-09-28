@@ -6,6 +6,9 @@ import com.avdhoot.StudyGroupFinderAPI.dto.reportDto.ReportStatusResponse;
 import com.avdhoot.StudyGroupFinderAPI.service.ReportService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -29,10 +32,15 @@ public class ReportController {
     }
 
     @GetMapping("/groups/{groupId}/report")
-    public ResponseEntity<List<ReportStatusResponse>> getAllReport(
+    public ResponseEntity<Page<ReportStatusResponse>> getAllReport(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
             @PathVariable("groupId") Integer groupId
     ){
-        List<ReportStatusResponse> reportStatusResponses = service.getAllReport(groupId);
+
+        Pageable pageable = PageRequest.of(page, size);
+
+        Page<ReportStatusResponse> reportStatusResponses = service.getAllReport(groupId, pageable);
         return new ResponseEntity<>(reportStatusResponses, HttpStatus.FOUND);
     }
 

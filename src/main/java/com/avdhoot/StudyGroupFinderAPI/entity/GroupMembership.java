@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -25,12 +27,19 @@ public class GroupMembership {
 
     @ManyToOne
     @JoinColumn(name = "member_id")
-    private Member member;
+    private User user;
 
     @ManyToOne
     @JoinColumn(name = "study_group_id")
-    private StudyGroup group;
+    private Group group;
     private LocalDate joinedAt;
 //    role
+@ManyToMany
+@JoinTable(
+        name = "gorup_membership_roles",
+        joinColumns = @JoinColumn(name = "user_id"),
+        inverseJoinColumns = @JoinColumn(name = "role_id")
+)
+private Set<Roles> roles = new HashSet<>();
 
 }
