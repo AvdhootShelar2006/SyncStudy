@@ -20,7 +20,7 @@ public class Group {
     private Integer id;
 
     @Column(nullable = false, unique = true)
-    private String name;
+    private String groupName;
     private String subject;
     private String field;
     private String description;

@@ -1,7 +1,7 @@
 package com.avdhoot.StudyGroupFinderAPI.service;
 
-import com.avdhoot.StudyGroupFinderAPI.dto.memberDto.CreateUserDetailResponse;
-import com.avdhoot.StudyGroupFinderAPI.dto.memberDto.CreateUserRequestDto;
+import com.avdhoot.StudyGroupFinderAPI.dto.userDto.CreateUserDetailResponse;
+import com.avdhoot.StudyGroupFinderAPI.dto.userDto.CreateUserRequestDto;
 import com.avdhoot.StudyGroupFinderAPI.entity.Roles;
 import com.avdhoot.StudyGroupFinderAPI.entity.User;
 import com.avdhoot.StudyGroupFinderAPI.exception.DuplicateResourceException;

@@ -19,7 +19,7 @@ public class QueryController {
 
     private final QueryService queryService;
 
-    @PostMapping("/groups/{groupId}/queries")
+    @PostMapping("/groups/{groupId}/query")
     public ResponseEntity<CreateQueryResponse> createQuery(
            @PathVariable("groupId") Integer groupId,
            @Valid @RequestBody CreateQueryRequest request
@@ -28,7 +28,7 @@ public class QueryController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/groups/{groupId}/queries")
+    @GetMapping("/groups/{groupId}/query")
     public ResponseEntity<Page<CreateQueryResponse>> getAllGroupQueries(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
@@ -40,7 +40,7 @@ public class QueryController {
         return new ResponseEntity<>(queries, HttpStatus.FOUND);
     }
 
-    @GetMapping("/groups/{groupId}/queries/{queryId}")
+    @GetMapping("/groups/{groupId}/query/{queryId}")
     public ResponseEntity<CreateQueryResponse> getGroupQueryById(
             @PathVariable("groupId") Integer groupId,
             @PathVariable("queryId") Integer queryId
@@ -49,7 +49,7 @@ public class QueryController {
         return new ResponseEntity<>(queryById , HttpStatus.FOUND);
     }
 
-    @PatchMapping("/groups/{groupId}/queries/{queryId}/resolve")
+    @PatchMapping("/groups/{groupId}/query/{queryId}/resolve")
     public ResponseEntity<CreateQueryResponse> resolveQuery(
            @PathVariable("groupId") Integer groupId,
            @PathVariable("queryId") Integer queryId

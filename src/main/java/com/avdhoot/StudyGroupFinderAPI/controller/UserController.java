@@ -2,8 +2,8 @@ package com.avdhoot.StudyGroupFinderAPI.controller;
 
 import com.avdhoot.StudyGroupFinderAPI.dto.loginDto.LoginRequestDto;
 import com.avdhoot.StudyGroupFinderAPI.dto.loginDto.LoginResponseDto;
-import com.avdhoot.StudyGroupFinderAPI.dto.memberDto.CreateUserDetailResponse;
-import com.avdhoot.StudyGroupFinderAPI.dto.memberDto.CreateUserRequestDto;
+import com.avdhoot.StudyGroupFinderAPI.dto.userDto.CreateUserDetailResponse;
+import com.avdhoot.StudyGroupFinderAPI.dto.userDto.CreateUserRequestDto;
 import com.avdhoot.StudyGroupFinderAPI.service.JwtService;
 import com.avdhoot.StudyGroupFinderAPI.service.UserService;
 import jakarta.validation.Valid;

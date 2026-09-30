@@ -30,7 +30,7 @@ public class GroupMembership {
     private User user;
 
     @ManyToOne
-    @JoinColumn(name = "study_group_id")
+    @JoinColumn(name = "group_id")
     private Group group;
     private LocalDate joinedAt;
 //    role
