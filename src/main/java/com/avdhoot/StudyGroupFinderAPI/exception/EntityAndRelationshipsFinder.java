@@ -17,12 +17,12 @@ public class EntityAndRelationshipsFinder {
     private final UserRepository userRepository;
     private final GroupQueryRepository groupQueryRepository;
 
-    public Group getGroupOrThrow(Integer groupId){
+    public Group getGroupOrThrow(int groupId){
         return groupRepository.findById(groupId).orElseThrow(()-> new ResourceNotFoundException("Group with ID: " + groupId + " not found."));
     }
 
-    public User getMemberOrThrow(Integer memberId){
-        return userRepository.findById(memberId).orElseThrow(()-> new ResourceNotFoundException("User with ID: " + memberId + " not found."));
+    public User getUserOrThrow(int userId){
+        return userRepository.findById(userId).orElseThrow(()-> new ResourceNotFoundException("User with ID: " + userId + " not found."));
     }
 
     public Query getQueryInGroupOrThrow(int queryId, int groupId) {

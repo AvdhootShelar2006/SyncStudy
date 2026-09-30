@@ -4,6 +4,7 @@ import com.avdhoot.StudyGroupFinderAPI.dto.groupDto.CreateGroupRequestDto;
 import com.avdhoot.StudyGroupFinderAPI.dto.groupDto.GroupResponseDto;
 import com.avdhoot.StudyGroupFinderAPI.dto.groupDto.UpdateGroupRequestDto;
 import com.avdhoot.StudyGroupFinderAPI.dto.groupMemberDto.*;
+import com.avdhoot.StudyGroupFinderAPI.entity.CustomUserDetails;
 import com.avdhoot.StudyGroupFinderAPI.entity.Group;
 import com.avdhoot.StudyGroupFinderAPI.service.GroupService;
 import jakarta.validation.Valid;
@@ -13,25 +14,32 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
 @RequestMapping("api")
-@RequiredArgsConstructor
+//@RequiredArgsConstructor
 public class GroupController {
 
-    private final GroupService groupService;
+    private  GroupService groupService;
 
+    public GroupController(GroupService groupService) {
+        this.groupService = groupService;
+    }
     /*
         Create Group
      */
     @PostMapping("/groups")
     public ResponseEntity<GroupResponseDto> createGroup(
-            @Valid @RequestBody CreateGroupRequestDto requestDto
-    ){
-            GroupResponseDto groupResponseDto = groupService.createGroup(requestDto);
+            @Valid @RequestBody CreateGroupRequestDto requestDto,
+            @AuthenticationPrincipal CustomUserDetails userDetails
+            ){
+
+            GroupResponseDto groupResponseDto = groupService.createGroup(requestDto, userDetails.getUser());
+
             return ResponseEntity
                     .status(HttpStatus.CREATED)
                     .body(groupResponseDto);
@@ -79,9 +87,10 @@ public class GroupController {
     @PostMapping("/groups/{groupId}/join")
     public ResponseEntity <JoinGroupResponse> joinGroup(
             @PathVariable("groupId") Integer groupId,
-            @RequestBody JoinGroupRequest request
+           @AuthenticationPrincipal CustomUserDetails userDetails
     ){
-        return new ResponseEntity<>(groupService.joinGroup(groupId, request), HttpStatus.CREATED);
+        JoinGroupResponse response = groupService.joinGroup(groupId, userDetails.getUser());
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
     /*

@@ -1,8 +1,8 @@
-package com.avdhoot.StudyGroupFinderAPI.dto.memberDto;
+package com.avdhoot.StudyGroupFinderAPI.dto.userDto;
 
 import java.time.LocalDate;
 
-public record CreateMemberDetailResponse(
+public record CreateUserDetailResponse(
         String name,
         String email,
         String username,

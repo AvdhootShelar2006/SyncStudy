@@ -35,4 +35,6 @@ build/
 # Environment Variables
 .env
 
-frontend/
+# Spring Boot
+application.properties
+

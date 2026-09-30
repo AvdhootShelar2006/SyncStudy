@@ -1,11 +1,9 @@
 package com.avdhoot.StudyGroupFinderAPI.service;
 
-import com.avdhoot.StudyGroupFinderAPI.dto.answerQuery.ReplyRequest;
 import com.avdhoot.StudyGroupFinderAPI.entity.*;
 import com.avdhoot.StudyGroupFinderAPI.exception.EntityAndRelationshipsFinder;
 import com.avdhoot.StudyGroupFinderAPI.exception.ResourceNotFoundException;
 import com.avdhoot.StudyGroupFinderAPI.mapper.QueryMapper;
-import com.avdhoot.StudyGroupFinderAPI.dto.answerQuery.ReplyResponse;
 import com.avdhoot.StudyGroupFinderAPI.dto.queryDto.CreateQueryRequest;
 import com.avdhoot.StudyGroupFinderAPI.dto.queryDto.CreateQueryResponse;
 import com.avdhoot.StudyGroupFinderAPI.repository.groupRepository.GroupMembershipRepository;
@@ -30,11 +28,11 @@ public class QueryService {
 
 
     public CreateQueryResponse postQuery(int groupId, CreateQueryRequest request) {
-        User user = entityAndRelationshipsFinder.getMemberOrThrow(request.memberId());
+        User user = entityAndRelationshipsFinder.getUserOrThrow(request.memberId());
         Group group = entityAndRelationshipsFinder.getGroupOrThrow(groupId);
 
         if(!groupMembershipRepository.existsByGroupAndUser(group, user)) {
-            throw  new ResourceNotFoundException(" User with ID:" + user.getId() + " does not belong to "+ group.getName()+" group.");
+            throw  new ResourceNotFoundException(" User with ID:" + user.getId() + " does not belong to "+ group.getGroupName()+" group.");
         }
         Query newQuery = Query
                 .builder()

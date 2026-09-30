@@ -18,7 +18,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -30,8 +29,8 @@ public class ReportService {
     private final EntityAndRelationshipsFinder entityAndRelationshipsFinder;
 
     public void createReport(int groupId, ReportRequest request) {
-        User reportedBy = entityAndRelationshipsFinder.getMemberOrThrow(request.reportedBy());
-        User targetUser = entityAndRelationshipsFinder.getMemberOrThrow(request.targetMember());
+        User reportedBy = entityAndRelationshipsFinder.getUserOrThrow(request.reportedBy());
+        User targetUser = entityAndRelationshipsFinder.getUserOrThrow(request.targetMember());
         Group group = entityAndRelationshipsFinder.getGroupOrThrow(groupId);
 
         if(!groupMembershipRepository.existsByGroupAndUser(group, reportedBy)){

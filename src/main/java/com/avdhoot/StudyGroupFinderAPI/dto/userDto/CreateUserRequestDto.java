@@ -1,11 +1,11 @@
-package com.avdhoot.StudyGroupFinderAPI.dto.memberDto;
+package com.avdhoot.StudyGroupFinderAPI.dto.userDto;
 
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
-public record CreateMemberRequestDto (
+public record CreateUserRequestDto(
         @NotBlank(message = "Name is required")
         @Size(min = 2, max = 70, message = "Name must be between 2 and 70 characters")
         String name,

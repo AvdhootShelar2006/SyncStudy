@@ -19,7 +19,7 @@ public class ReplyController {
     private final ReplyService replyServiceService;
 
 
-    @PostMapping("/groups/{groupId}/queries/{queryId}/solutions")
+    @PostMapping("/groups/{groupId}/query/{queryId}/solutions")
     public ResponseEntity<ReplyResponse> createReply(
             @PathVariable("groupId") Integer groupId,
             @PathVariable("queryId") Integer queryId,
@@ -29,7 +29,7 @@ public class ReplyController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @GetMapping("/groups/{groupId}/queries/{queryId}/solutions")
+    @GetMapping("/groups/{groupId}/query/{queryId}/solutions")
     public ResponseEntity<Page<ReplyResponse>> getAllSolutions(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,

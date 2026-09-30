@@ -28,7 +28,7 @@ public class ReplyService {
 
         Group group = entityAndRelationshipsFinder.getGroupOrThrow(groupId);
         Query query = entityAndRelationshipsFinder.getQueryInGroupOrThrow(questionQueryId, groupId);
-        User user = entityAndRelationshipsFinder.getMemberOrThrow(request.memberId());
+        User user = entityAndRelationshipsFinder.getUserOrThrow(request.memberId());
 
         Reply reply = Reply
                 .builder()
