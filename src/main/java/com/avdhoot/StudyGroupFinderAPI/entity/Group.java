@@ -27,12 +27,14 @@ public class Group {
     private Integer maxMembers;
     private String tags;
     private Boolean isOpen;
-
     @CreationTimestamp
     @Column(updatable = false)
     private LocalDate createdAt;
 
     @Column(name = "group_admin")
     private String createdBy;
+
+    private Boolean isEnable;
+
 
 }

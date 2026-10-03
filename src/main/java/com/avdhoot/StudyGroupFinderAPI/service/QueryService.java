@@ -27,12 +27,12 @@ public class QueryService {
     private final EntityAndRelationshipsFinder entityAndRelationshipsFinder;
 
 
-    public CreateQueryResponse postQuery(int groupId, CreateQueryRequest request) {
-        User user = entityAndRelationshipsFinder.getUserOrThrow(request.memberId());
+    public CreateQueryResponse postQuery(int groupId,CreateQueryRequest request ,int creatorId) {
+        User user = entityAndRelationshipsFinder.getUserOrThrow(creatorId);
         Group group = entityAndRelationshipsFinder.getGroupOrThrow(groupId);
 
         if(!groupMembershipRepository.existsByGroupAndUser(group, user)) {
-            throw  new ResourceNotFoundException(" User with ID:" + user.getId() + " does not belong to "+ group.getGroupName()+" group.");
+            throw  new ResourceNotFoundException(" User with ID:" + creatorId + " does not belong to "+ group.getGroupName()+" group. Please join the Group before posting Query");
         }
         Query newQuery = Query
                 .builder()
@@ -63,12 +63,14 @@ public class QueryService {
         return queryMapper.toCreateQueryResponse(query);
     }
 
-    public CreateQueryResponse resolveGroupQuery(int questionQueryId, int groupId) {
+    public CreateQueryResponse resolveGroupQuery(int questionQueryId, int groupId, boolean resolve) {
         Query query = entityAndRelationshipsFinder.getQueryInGroupOrThrow(questionQueryId, groupId);
-        query.setResolved(true);
+        query.setResolved(resolve);
+
+        CreateQueryResponse queryResponse = queryMapper.toCreateQueryResponse(query);
         groupQueryRepository.save(query);
 
-        return queryMapper.toCreateQueryResponse(query);
+        return queryResponse;
     }
 
 }

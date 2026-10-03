@@ -2,6 +2,7 @@ package com.avdhoot.StudyGroupFinderAPI.service;
 
 import com.avdhoot.StudyGroupFinderAPI.dto.userDto.CreateUserDetailResponse;
 import com.avdhoot.StudyGroupFinderAPI.dto.userDto.CreateUserRequestDto;
+import com.avdhoot.StudyGroupFinderAPI.entity.CustomUserDetails;
 import com.avdhoot.StudyGroupFinderAPI.entity.Roles;
 import com.avdhoot.StudyGroupFinderAPI.entity.User;
 import com.avdhoot.StudyGroupFinderAPI.exception.DuplicateResourceException;
@@ -37,7 +38,7 @@ public class UserService {
         user.setName(requestDto.name());
         user.setUsername(requestDto.username());
 
-        Roles roles = rolesRepository.findByName("ROLE_USER").orElseThrow(()-> new ResourceNotFoundException("ROLE_USER not Found!!"));
+        Roles roles = rolesRepository.findByName("ROLE_USER").orElseThrow(()-> new ResourceNotFoundException("USER not Found!!"));
 
         String encodedPassword =
                 passwordEncoder.encode(requestDto.password());
@@ -56,8 +57,8 @@ public class UserService {
         return memberMapper.toMemberResponseDto(user);
     }
 
-    public Page<CreateUserDetailResponse> getAllMembers(Pageable pageable) {
-        Page<User> members = userRepository.findAll(pageable);
-        return members.map(member -> memberMapper.toMemberResponseDto(member));
+    public CustomUserDetails getAuthorities(CustomUserDetails userDetails) {
+        return null;
     }
+
 }

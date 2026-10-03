@@ -3,10 +3,8 @@ package com.avdhoot.StudyGroupFinderAPI.service;
 import com.avdhoot.StudyGroupFinderAPI.dto.groupDto.UpdateGroupRequestDto;
 import com.avdhoot.StudyGroupFinderAPI.dto.groupMemberDto.*;
 import com.avdhoot.StudyGroupFinderAPI.entity.*;
-import com.avdhoot.StudyGroupFinderAPI.exception.AlreadyExistsException;
-import com.avdhoot.StudyGroupFinderAPI.exception.DuplicateResourceException;
-import com.avdhoot.StudyGroupFinderAPI.exception.EntityAndRelationshipsFinder;
-import com.avdhoot.StudyGroupFinderAPI.exception.ResourceNotFoundException;
+import com.avdhoot.StudyGroupFinderAPI.enums.GroupRole;
+import com.avdhoot.StudyGroupFinderAPI.exception.*;
 import com.avdhoot.StudyGroupFinderAPI.mapper.GroupMapper;
 import com.avdhoot.StudyGroupFinderAPI.mapper.MembershipMapper;
 import com.avdhoot.StudyGroupFinderAPI.dto.groupDto.CreateGroupRequestDto;
@@ -21,7 +19,6 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 @Service
@@ -41,16 +38,12 @@ public class GroupService {
         if(groupRepository.existsByGroupName(group.getGroupName())){
             throw new DuplicateResourceException("Group with name: " + group.getGroupName() + " already exist.");
         }
-        Roles groupAdminRole = roleRepository
-                .findByName("ROLE_GROUP_ADMIN")
-                .orElseThrow();
-
-        Set<Roles> roles = new HashSet<>();
-        roles.add(groupAdminRole);
 
         group.setIsOpen(true);
+        group.setCreatedBy(user.getUsername());
+        group.setIsEnable(true);
 
-        GroupMembership membership = membershipMapper.createMembership(user, group, roles);
+        GroupMembership membership = membershipMapper.createMembership(user, group, GroupRole.OWNER);
 
         groupRepository.save(group);
         groupMembershipRepository.save(membership);
@@ -110,8 +103,8 @@ public class GroupService {
         return memberships.map(membershipMapper::toGroupMemberDetailsResponse);
     }
 
-    public LeaveResponseDto leaveGroup(int groupId, LeaveRequestDto request){
-            User user = entityRelationshipsFinder.getUserOrThrow(request.memberId());
+    public LeaveResponseDto leaveGroup(int groupId, int userId ){
+            User user = entityRelationshipsFinder.getUserOrThrow(userId);
             Group group = entityRelationshipsFinder.getGroupOrThrow(groupId);
 
             GroupMembership membership = groupMembershipRepository
@@ -131,29 +124,35 @@ public class GroupService {
         return leaveResponse;
     }
 
-    public List<Group> searchGroups(String keyword) {
-        return groupRepository.searchUsingKeyword(keyword);
+    public Page<GroupResponseDto> searchGroups(Pageable pageable, String keyword) {
+        String pattern = "%" + keyword.trim().toLowerCase() + "%";
+        return groupRepository.searchUsingKeyword(pattern, pageable).map(groupMapper::toGroupResponseDto);
     }
 
     public JoinGroupResponse joinGroup(int groupId, User user) {
 
         Group group = entityRelationshipsFinder.getGroupOrThrow(groupId);
 
+        if (!group.getIsEnable()) {
+            throw new GroupNotActiveException(
+                    "Group " + group.getGroupName() + " is currently disabled. You cannot join this group."
+            );
+        }
         if(groupMembershipRepository.existsByGroup_IdAndUser_Id(group.getId(), user.getId())){
             throw new AlreadyExistsException("User with id: " + user.getId() + " already exists in the group");
         }
-        Roles memberRole = roleRepository
-                .findByName("ROLE_MEMBER")
-                .orElseThrow();
 
-        Set<Roles> roles = new HashSet<>();
-        roles.add(memberRole);
-
-        GroupMembership groupMembership = membershipMapper.createMembership(user, group,roles );
+        GroupMembership groupMembership = membershipMapper.createMembership(user, group, GroupRole.MEMBER);
+        groupMembershipRepository.save(groupMembership);
 
         JoinGroupResponse joinGroupResponse = membershipMapper.toJoinGroupResponse(user, group, groupMembership);
 
-        groupMembershipRepository.save(groupMembership);
+
         return joinGroupResponse;
+    }
+
+    public Page<GroupResponseDto> getAllGroupsTheUserIsJoinedIn(Pageable pageable, Integer userId) {
+        Page<Group> groups = groupMembershipRepository.findByUser_Id(pageable, userId);
+        return groups.map(groupMapper::toGroupResponseDto);
     }
 }

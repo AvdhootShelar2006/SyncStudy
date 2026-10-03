@@ -17,7 +17,7 @@ import java.util.Map;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler
+    @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<ExceptionResponseDto> handleResourceNotFoundException(
             ResourceNotFoundException exception,
             HttpServletRequest request
@@ -31,6 +31,21 @@ public class GlobalExceptionHandler {
       );
 
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(exceptionResponse);
+    }
+
+    @ExceptionHandler(GroupNotActiveException.class)
+    public ResponseEntity<ExceptionResponseDto> handleGroupNotActiveException(
+            GroupNotActiveException exception,
+            HttpServletRequest request
+    ){
+        ExceptionResponseDto exceptionResponse = new  ExceptionResponseDto(
+                LocalDateTime.now(),
+                HttpStatus.FORBIDDEN.value(),
+                HttpStatus.FORBIDDEN.getReasonPhrase(),
+                exception.getMessage(),
+                request.getRequestURI()
+        );
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(exceptionResponse);
     }
 
     @ExceptionHandler(DuplicateResourceException.class)

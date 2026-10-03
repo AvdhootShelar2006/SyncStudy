@@ -4,7 +4,7 @@ import java.time.LocalDate;
 
 public record GroupMemberDetailsResponse (
         Integer memberId,
-        String name,
+        String username,
         LocalDate joinedAt
 ){
 }

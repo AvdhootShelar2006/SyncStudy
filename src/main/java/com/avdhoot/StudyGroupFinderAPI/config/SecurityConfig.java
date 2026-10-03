@@ -4,11 +4,16 @@ import com.avdhoot.StudyGroupFinderAPI.service.CustomUserDetailsService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.convert.converter.Converter;
+import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.ProviderManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
@@ -22,6 +27,7 @@ import javax.crypto.spec.SecretKeySpec;
 import java.util.Base64;
 
 @Configuration
+@EnableMethodSecurity
 public class SecurityConfig {
 
     @Bean
@@ -44,16 +50,19 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(
             HttpSecurity httpSecurity,
             DaoAuthenticationProvider provider,
-            JwtAuthenticationConverter jwtAuthenticationConverter
+            Converter<Jwt, AbstractAuthenticationToken> jwtAuthenticationConverter
    ) {
         httpSecurity.csrf(csrf-> csrf.disable())
                 .authenticationProvider(provider)
                 .authorizeHttpRequests(
                         auth -> auth.requestMatchers(
-                                "/api/user/register",
-                                "/api/auth/login"
-                                )
-                                .permitAll()
+                                "/api/auth/register",
+                                "/api/auth/login",
+                                "/swagger-ui/**",
+                                "/swagger-ui.html",
+                                "/v3/api-docs/**"
+                                ).permitAll()
+                                .requestMatchers("/api/admin/**").hasRole("PLATFORM_ADMIN")
                                 .anyRequest()
                                 .authenticated()
                 )
@@ -78,29 +87,15 @@ public class SecurityConfig {
     }
 
     @Bean
-    public JwtAuthenticationConverter jwtAuthenticationConverter() {
+    public Converter<Jwt, AbstractAuthenticationToken> jwtAuthenticationConverter(
+            CustomUserDetailsService userDetailsService) {
 
-        JwtGrantedAuthoritiesConverter authoritiesConverter =
-                new JwtGrantedAuthoritiesConverter();
-
-        authoritiesConverter.setAuthoritiesClaimName(
-                "authorities"
-        );
-
-        authoritiesConverter.setAuthorityPrefix("");
-
-        JwtAuthenticationConverter
-                authenticationConverter =
-                new JwtAuthenticationConverter();
-
-        authenticationConverter
-                .setJwtGrantedAuthoritiesConverter(
-                        authoritiesConverter
-                );
-
-        return authenticationConverter;
+        return jwt -> {
+            UserDetails principal = userDetailsService.loadUserByUsername(jwt.getSubject());
+            return new UsernamePasswordAuthenticationToken(
+                    principal, jwt, principal.getAuthorities());
+        };
     }
-
     @Bean
     public AuthenticationManager authenticationManager(DaoAuthenticationProvider provider) {
         return new ProviderManager(provider);

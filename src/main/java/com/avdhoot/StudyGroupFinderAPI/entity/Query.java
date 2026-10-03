@@ -21,7 +21,7 @@ public class Query {
     private String description;
 
     @ManyToOne
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "postedBy_id")
     private User postedBy;
 
     @ManyToOne

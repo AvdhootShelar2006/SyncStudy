@@ -28,16 +28,22 @@ public class ReportService {
     private final ReportMapper reportMapper;
     private final EntityAndRelationshipsFinder entityAndRelationshipsFinder;
 
-    public void createReport(int groupId, ReportRequest request) {
-        User reportedBy = entityAndRelationshipsFinder.getUserOrThrow(request.reportedBy());
-        User targetUser = entityAndRelationshipsFinder.getUserOrThrow(request.targetMember());
+    public void createReport(int groupId, ReportRequest request, int reportedById) {
         Group group = entityAndRelationshipsFinder.getGroupOrThrow(groupId);
 
-        if(!groupMembershipRepository.existsByGroupAndUser(group, reportedBy)){
-            throw new ResourceNotFoundException(reportedBy.getName() + " is not the part of the group");
+        User reportedBy = entityAndRelationshipsFinder.getUserOrThrow(reportedById);
+        if (!groupMembershipRepository.existsByGroupAndUser(group, reportedBy)) {
+            throw new ResourceNotFoundException(
+                     "You are not a part of " +group.getGroupName()+ ". Please join the group before reporting any member.");
         }
+
+
+        User targetUser = entityAndRelationshipsFinder.getUserOrThrow(request.targetMember());
         if(!groupMembershipRepository.existsByGroupAndUser(group, targetUser)){
-            throw new ResourceNotFoundException(targetUser.getName() + " is not the part of the group");
+            throw new ResourceNotFoundException(
+                    "The Member you trying to report in not a part of "
+                            + group.getGroupName()
+            );
         }
 
         Report report = Report
@@ -59,12 +65,14 @@ public class ReportService {
         return reports.map(reportMapper::toReportStatusResponse);
     }
 
-    public void updateReportStatus(int reportId, ReportStatusRequest reportStatusRequest) {
-        Report report = reportRepository.findById(reportId).orElseThrow(()->new ResourceNotFoundException("Report with " + reportId + " not found"));
+    public ReportStatusResponse updateReportStatus( int groupId, int reportId, ReportStatusRequest reportStatusRequest) {
+        Report report = reportRepository.findByTargetGroupId_IdAndId(groupId, reportId).orElseThrow(()->new ResourceNotFoundException("Report with " + reportId + " not found"));
 
         if(reportStatusRequest.status() != null){
             report.setStatus(reportStatusRequest.status());
         }
+        ReportStatusResponse reportStatusResponse = reportMapper.toReportStatusResponse(report);
         reportRepository.save(report);
+        return reportStatusResponse;
     }
 }
