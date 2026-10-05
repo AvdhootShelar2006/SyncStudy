@@ -25,7 +25,7 @@ public class EntityAndRelationshipsFinder {
         return userRepository.findById(userId).orElseThrow(()-> new ResourceNotFoundException("User with ID: " + userId + " not found."));
     }
 
-    public Query getQueryInGroupOrThrow(int queryId, int groupId) {
+    public Query getQueryInGroupOrThrow(int groupId, int queryId) {
         Query query = groupQueryRepository.findById(queryId)
                 .orElseThrow(() -> new ResourceNotFoundException("Query with ID: " + queryId + " not found"));
 

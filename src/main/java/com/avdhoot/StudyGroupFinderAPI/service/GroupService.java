@@ -132,15 +132,26 @@ public class GroupService {
     public JoinGroupResponse joinGroup(int groupId, User user) {
 
         Group group = entityRelationshipsFinder.getGroupOrThrow(groupId);
+        Integer totalMembers = group.getTotalMembers();
 
         if (!group.getIsEnable()) {
             throw new GroupNotActiveException(
                     "Group " + group.getGroupName() + " is currently disabled. You cannot join this group."
             );
         }
+
+        if (totalMembers >= group.getMaxMembers()) {
+            throw new GroupFullException(
+                    "Group maximum number of members exceeded"
+            );
+        }
+
         if(groupMembershipRepository.existsByGroup_IdAndUser_Id(group.getId(), user.getId())){
             throw new AlreadyExistsException("User with id: " + user.getId() + " already exists in the group");
         }
+        totalMembers = totalMembers + 1;
+        group.setTotalMembers(totalMembers);
+        groupRepository.save(group);
 
         GroupMembership groupMembership = membershipMapper.createMembership(user, group, GroupRole.MEMBER);
         groupMembershipRepository.save(groupMembership);
@@ -151,8 +162,10 @@ public class GroupService {
         return joinGroupResponse;
     }
 
-    public Page<GroupResponseDto> getAllGroupsTheUserIsJoinedIn(Pageable pageable, Integer userId) {
-        Page<Group> groups = groupMembershipRepository.findByUser_Id(pageable, userId);
+    public Page<GroupResponseDto> getAllGroupsUserIsJoinedIn(Pageable pageable, CustomUserDetails userDetails) {
+
+        Page<Group> groups = groupMembershipRepository.findGroupsByUserId(userDetails.getId(), pageable);
+
         return groups.map(groupMapper::toGroupResponseDto);
     }
 }

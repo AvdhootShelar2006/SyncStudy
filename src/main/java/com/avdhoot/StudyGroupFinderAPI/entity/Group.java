@@ -27,6 +27,8 @@ public class Group {
     private Integer maxMembers;
     private String tags;
     private Boolean isOpen;
+    private Integer totalMembers;
+
     @CreationTimestamp
     @Column(updatable = false)
     private LocalDate createdAt;

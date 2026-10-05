@@ -43,7 +43,7 @@ public class QueryController {
         Pageable pageable = PageRequest.of(page, size);
 
         Page<CreateQueryResponse> queries = queryService.getAllGroupQueries(pageable, groupId);
-        return new ResponseEntity<>(queries, HttpStatus.FOUND);
+        return new ResponseEntity<>(queries, HttpStatus.OK);
     }
 
     @GetMapping("/groups/{groupId}/query/{queryId}")
@@ -52,7 +52,7 @@ public class QueryController {
             @PathVariable("queryId") Integer queryId
     ) {
         CreateQueryResponse queryById = queryService.getGroupQueryById(queryId, groupId);
-        return new ResponseEntity<>(queryById , HttpStatus.FOUND);
+        return new ResponseEntity<>(queryById , HttpStatus.OK);
     }
 
     @PreAuthorize("@groupSecurityConfig.isQueryOwner(authentication, #queryId)")

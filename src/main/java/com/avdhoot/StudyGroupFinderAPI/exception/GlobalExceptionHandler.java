@@ -55,7 +55,7 @@ public class GlobalExceptionHandler {
     ){
         ExceptionResponseDto exceptionResponse = new ExceptionResponseDto(
                 LocalDateTime.now(),
-                HttpStatus.CONTINUE.value(),
+                HttpStatus.CONFLICT.value(),
                 HttpStatus.CONFLICT.getReasonPhrase(),
                 exception.getMessage(),
                 request.getRequestURI()
@@ -63,6 +63,7 @@ public class GlobalExceptionHandler {
 
         return ResponseEntity.status(HttpStatus.CONFLICT).body(exceptionResponse);
     }
+
 
     @ExceptionHandler(AlreadyExistsException.class)
     public ResponseEntity<ExceptionResponseDto> handleAlreadyExistsException(
@@ -103,6 +104,22 @@ public class GlobalExceptionHandler {
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
                 .body(validationExceptionResponse);
+    }
+
+    @ExceptionHandler(GroupFullException.class)
+    public ResponseEntity<ExceptionResponseDto> handleGroupFullException(
+            DuplicateResourceException exception,
+            HttpServletRequest request
+    ){
+        ExceptionResponseDto exceptionResponse = new ExceptionResponseDto(
+                LocalDateTime.now(),
+                HttpStatus.BAD_REQUEST.value(),
+                HttpStatus.BAD_REQUEST.getReasonPhrase(),
+                exception.getMessage(),
+                request.getRequestURI()
+        );
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exceptionResponse);
     }
 
     @ExceptionHandler(RuntimeException.class)

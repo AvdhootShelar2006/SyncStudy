@@ -10,7 +10,7 @@ import java.util.List;
 
 @Mapper(componentModel = "spring")
 public interface GroupMapper {
-    @Mapping(source = "name", target = "groupName")
+    @Mapping(source = "groupName", target = "groupName")
     Group toEntity(CreateGroupRequestDto dto);
 
     @Mapping(source = "groupName", target = "name")

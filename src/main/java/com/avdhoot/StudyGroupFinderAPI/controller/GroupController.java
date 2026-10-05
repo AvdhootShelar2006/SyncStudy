@@ -24,6 +24,7 @@ public class GroupController {
 
     private final GroupService groupService;
 
+    // TODO: Fix every dto so that it returns the sepcific id and fix enable as to expose int dto for gorup
     public GroupController(GroupService groupService) {
         this.groupService = groupService;
     }
@@ -39,10 +40,9 @@ public class GroupController {
             GroupResponseDto groupResponseDto = groupService.createGroup(requestDto, userDetails.getUser());
 
             return ResponseEntity
-                    .status(HttpStatus.CREATED)
+                    .status(HttpStatus.OK)
                     .body(groupResponseDto);
     }
-
 
     /*
         Update Groups
@@ -60,7 +60,7 @@ public class GroupController {
     /*
         Get All the Groups
     */
-    @PreAuthorize(("hasRole('USER')"))
+    @PreAuthorize("isAuthenticated()")
     @GetMapping("/groups")
     public ResponseEntity<Page<GroupResponseDto>> getAllGroups(
             @RequestParam(defaultValue = "0") int page,
@@ -76,7 +76,7 @@ public class GroupController {
     /*
         Get Group By Id
      */
-    @PreAuthorize(("hasRole('USER')"))
+    @PreAuthorize("isAuthenticated()")
     @GetMapping("/group/{groupId}")
     public ResponseEntity<GroupResponseDto> getGroupById(@PathVariable("groupId") Integer groupId){
         return ResponseEntity.ok(groupService.getGroupById(groupId));
@@ -85,7 +85,8 @@ public class GroupController {
     /*
         Join Group
      */
-    @PreAuthorize(("hasRole('USER')"))
+    // TODO: Fix the join group for max member check and create and exception custom
+    @PreAuthorize("isAuthenticated()")
     @PostMapping("/join/{groupId}")
     public ResponseEntity <JoinGroupResponse> joinGroup(
             @PathVariable("groupId") Integer groupId,
@@ -128,7 +129,7 @@ public class GroupController {
     /*
         Search By Keyword
      */
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("isAuthenticated()")
     @GetMapping("/groups/search")
     public ResponseEntity<Page<GroupResponseDto>> search(
             @RequestParam(defaultValue = "0") int page,
@@ -141,19 +142,19 @@ public class GroupController {
         return ResponseEntity.ok(responseDtos);
     }
 
+
     /*
-        Get All Groups the user is part of
-     */
-    @PreAuthorize("hasRole('USER')")
-    @GetMapping("/groups/groupmemberships")
-    public ResponseEntity<Page<GroupResponseDto>> getAllGroupsTheUserIsJoinedIn(
+       Get All Groups the user is part of
+    */
+    @PreAuthorize("isAuthenticated()")
+    @GetMapping("communities")
+    public ResponseEntity<Page<GroupResponseDto>> getAllGroupsUserIsJoinedIn(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
-            @AuthenticationPrincipal CustomUserDetails userDetails
-    ){
+            @AuthenticationPrincipal CustomUserDetails userDetails){
         Pageable pageable = PageRequest.of(page, size);
-        Page<GroupResponseDto> responseDtos = groupService.getAllGroupsTheUserIsJoinedIn(pageable, userDetails.getId());
 
-        return ResponseEntity.ok(responseDtos);
+        Page<GroupResponseDto> createGroupRequestDtos = groupService.getAllGroupsUserIsJoinedIn(pageable, userDetails);
+        return ResponseEntity.ok(createGroupRequestDtos);
     }
 }

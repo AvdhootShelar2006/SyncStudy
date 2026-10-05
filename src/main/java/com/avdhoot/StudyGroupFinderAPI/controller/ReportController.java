@@ -34,7 +34,7 @@ public class ReportController {
             @AuthenticationPrincipal CustomUserDetails userDetails
     ) {
         service.createReport(groupId, request, userDetails.getId());
-        return new ResponseEntity<>(HttpStatus.CREATED);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
 
@@ -49,7 +49,7 @@ public class ReportController {
         Pageable pageable = PageRequest.of(page, size);
 
         Page<ReportStatusResponse> reportStatusResponses = service.getAllReport(groupId, pageable);
-        return new ResponseEntity<>(reportStatusResponses, HttpStatus.FOUND);
+        return new ResponseEntity<>(reportStatusResponses, HttpStatus.OK);
     }
 
 

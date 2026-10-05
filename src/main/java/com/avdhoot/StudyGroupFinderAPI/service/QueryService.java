@@ -58,13 +58,13 @@ public class QueryService {
     }
 
     public CreateQueryResponse getGroupQueryById(int questionQueryId, int groupId) {
-        Query query = entityAndRelationshipsFinder.getQueryInGroupOrThrow(questionQueryId, groupId);
+        Query query = entityAndRelationshipsFinder.getQueryInGroupOrThrow(groupId,questionQueryId);
 
         return queryMapper.toCreateQueryResponse(query);
     }
 
     public CreateQueryResponse resolveGroupQuery(int questionQueryId, int groupId, boolean resolve) {
-        Query query = entityAndRelationshipsFinder.getQueryInGroupOrThrow(questionQueryId, groupId);
+        Query query = entityAndRelationshipsFinder.getQueryInGroupOrThrow(groupId, questionQueryId);
         query.setResolved(resolve);
 
         CreateQueryResponse queryResponse = queryMapper.toCreateQueryResponse(query);

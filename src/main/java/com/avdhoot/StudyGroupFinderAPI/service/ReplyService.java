@@ -30,7 +30,7 @@ public class ReplyService {
     public ReplyResponse createReply(int groupId, int questionQueryId, ReplyRequest request, int replyCreatorId) {
 
         Group group = entityAndRelationshipsFinder.getGroupOrThrow(groupId);
-        Query query = entityAndRelationshipsFinder.getQueryInGroupOrThrow(questionQueryId, groupId);
+        Query query = entityAndRelationshipsFinder.getQueryInGroupOrThrow(groupId,questionQueryId);
         User user = entityAndRelationshipsFinder.getUserOrThrow(replyCreatorId);
 
         if(!groupMembershipRepository.existsByGroupAndUser(group, user)) {
@@ -55,9 +55,10 @@ public class ReplyService {
 
         Query query = entityAndRelationshipsFinder.getQueryInGroupOrThrow(groupId, queryId);
 
-        entityAndRelationshipsFinder.getQueryInGroupOrThrow(query.getQueryId(), group.getId());
-
-        Page<Reply> replies = answerRepository.findByGroup_IdAndQuery_QueryId( groupId,  queryId, pageable);
+        Page<Reply> replies = answerRepository.findByGroup_IdAndQuery_QueryId(
+                group.getId(),
+                query.getQueryId(),
+                pageable);
 
         return replies.map(queryMapper::toAnswerQueryResponse);
     }

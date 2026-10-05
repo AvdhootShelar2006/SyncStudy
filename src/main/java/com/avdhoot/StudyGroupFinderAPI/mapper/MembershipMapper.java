@@ -16,7 +16,7 @@ import java.util.Set;
 @Mapper(componentModel = "spring")
 public interface MembershipMapper {
 
-    @Mapping(source = "user.id", target = "memberId")
+    @Mapping(source = "user.id", target = "userId")
     @Mapping(source = "user.username", target = "username")
     GroupMemberDetailsResponse toGroupMemberDetailsResponse(GroupMembership groupMembership);
 
@@ -30,7 +30,7 @@ public interface MembershipMapper {
     @Mapping(source = "groupRole", target = "groupRole")
     GroupMembership createMembership(User user, Group group, GroupRole groupRole);
 
-    @Mapping(source = "groupMembership.id", target = "memberId")
+    @Mapping(source = "user.id", target = "userId")
     @Mapping(source = "group.id", target = "groupId")
     @Mapping(source = "user.username", target = "username")
     @Mapping(source = "groupMembership.joinedAt", target = "joinedAt")

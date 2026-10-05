@@ -47,6 +47,8 @@ public class ReplyController {
         Pageable pageable = PageRequest.of(page, size);
 
         Page<ReplyResponse> answerQueries = replyServiceService.getAllSolutions(pageable, groupId, queryId);
-        return new ResponseEntity<>(answerQueries, HttpStatus.FOUND);
+        return new ResponseEntity<>(answerQueries, HttpStatus.OK);
     }
+
+
 }

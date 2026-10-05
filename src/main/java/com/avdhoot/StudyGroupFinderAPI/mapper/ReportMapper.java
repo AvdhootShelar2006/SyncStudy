@@ -10,6 +10,7 @@ import java.util.List;
 @Mapper(componentModel = "spring")
 public interface ReportMapper {
 
+    @Mapping(source = "id", target = "reportId")
     @Mapping(source = "targetUser.id", target = "targetMemberId")
     ReportStatusResponse toReportStatusResponse(Report report);
 
