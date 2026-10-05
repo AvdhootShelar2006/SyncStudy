@@ -1,5 +1,6 @@
 package com.avdhoot.StudyGroupFinderAPI.entity;
 
+import com.avdhoot.StudyGroupFinderAPI.enums.GroupRole;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -14,7 +15,7 @@ import java.util.Set;
 @Table(
         uniqueConstraints = {
                 @UniqueConstraint(
-                        columnNames = {"study_group_id", "member_id"} // unique combination
+                        columnNames = {"group_id", "user_id"} // unique combination
                 )
         }
 )
@@ -26,20 +27,15 @@ public class GroupMembership {
     private Integer id;
 
     @ManyToOne
-    @JoinColumn(name = "member_id")
+    @JoinColumn(name = "user_id")
     private User user;
 
     @ManyToOne
     @JoinColumn(name = "group_id")
     private Group group;
     private LocalDate joinedAt;
-//    role
-@ManyToMany
-@JoinTable(
-        name = "gorup_membership_roles",
-        joinColumns = @JoinColumn(name = "user_id"),
-        inverseJoinColumns = @JoinColumn(name = "role_id")
-)
-private Set<Roles> roles = new HashSet<>();
+
+    @Enumerated(EnumType.STRING)
+    private GroupRole groupRole;
 
 }

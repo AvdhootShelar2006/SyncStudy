@@ -1,6 +1,5 @@
 package com.avdhoot.StudyGroupFinderAPI.entity;
 
-import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import org.jspecify.annotations.Nullable;
 import org.springframework.security.core.GrantedAuthority;
@@ -8,11 +7,9 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
-import java.util.List;
 
 @NoArgsConstructor
 public class CustomUserDetails implements UserDetails {
-
 
     private User user;
 
@@ -49,5 +46,9 @@ public class CustomUserDetails implements UserDetails {
     @Override
     public boolean isEnabled() {
         return user.isEnabled();
+    }
+
+    public Integer getId() {
+        return user.getId();
     }
 }

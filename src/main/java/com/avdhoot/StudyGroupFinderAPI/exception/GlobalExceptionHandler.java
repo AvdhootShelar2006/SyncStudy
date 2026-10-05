@@ -17,7 +17,7 @@ import java.util.Map;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler
+    @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<ExceptionResponseDto> handleResourceNotFoundException(
             ResourceNotFoundException exception,
             HttpServletRequest request
@@ -33,6 +33,21 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(exceptionResponse);
     }
 
+    @ExceptionHandler(GroupNotActiveException.class)
+    public ResponseEntity<ExceptionResponseDto> handleGroupNotActiveException(
+            GroupNotActiveException exception,
+            HttpServletRequest request
+    ){
+        ExceptionResponseDto exceptionResponse = new  ExceptionResponseDto(
+                LocalDateTime.now(),
+                HttpStatus.FORBIDDEN.value(),
+                HttpStatus.FORBIDDEN.getReasonPhrase(),
+                exception.getMessage(),
+                request.getRequestURI()
+        );
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(exceptionResponse);
+    }
+
     @ExceptionHandler(DuplicateResourceException.class)
     public ResponseEntity<ExceptionResponseDto> handleDuplicateResourceException(
             DuplicateResourceException exception,
@@ -40,7 +55,7 @@ public class GlobalExceptionHandler {
     ){
         ExceptionResponseDto exceptionResponse = new ExceptionResponseDto(
                 LocalDateTime.now(),
-                HttpStatus.CONTINUE.value(),
+                HttpStatus.CONFLICT.value(),
                 HttpStatus.CONFLICT.getReasonPhrase(),
                 exception.getMessage(),
                 request.getRequestURI()
@@ -48,6 +63,7 @@ public class GlobalExceptionHandler {
 
         return ResponseEntity.status(HttpStatus.CONFLICT).body(exceptionResponse);
     }
+
 
     @ExceptionHandler(AlreadyExistsException.class)
     public ResponseEntity<ExceptionResponseDto> handleAlreadyExistsException(
@@ -88,6 +104,22 @@ public class GlobalExceptionHandler {
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
                 .body(validationExceptionResponse);
+    }
+
+    @ExceptionHandler(GroupFullException.class)
+    public ResponseEntity<ExceptionResponseDto> handleGroupFullException(
+            DuplicateResourceException exception,
+            HttpServletRequest request
+    ){
+        ExceptionResponseDto exceptionResponse = new ExceptionResponseDto(
+                LocalDateTime.now(),
+                HttpStatus.BAD_REQUEST.value(),
+                HttpStatus.BAD_REQUEST.getReasonPhrase(),
+                exception.getMessage(),
+                request.getRequestURI()
+        );
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exceptionResponse);
     }
 
     @ExceptionHandler(RuntimeException.class)

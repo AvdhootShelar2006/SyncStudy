@@ -2,13 +2,14 @@ package com.avdhoot.StudyGroupFinderAPI.service;
 
 import com.avdhoot.StudyGroupFinderAPI.dto.answerQuery.ReplyRequest;
 import com.avdhoot.StudyGroupFinderAPI.dto.answerQuery.ReplyResponse;
-import com.avdhoot.StudyGroupFinderAPI.entity.Group;
-import com.avdhoot.StudyGroupFinderAPI.entity.Query;
-import com.avdhoot.StudyGroupFinderAPI.entity.Reply;
-import com.avdhoot.StudyGroupFinderAPI.entity.User;
+import com.avdhoot.StudyGroupFinderAPI.entity.*;
+import com.avdhoot.StudyGroupFinderAPI.exception.AlreadyExistsException;
 import com.avdhoot.StudyGroupFinderAPI.exception.EntityAndRelationshipsFinder;
+import com.avdhoot.StudyGroupFinderAPI.exception.ResourceNotFoundException;
 import com.avdhoot.StudyGroupFinderAPI.mapper.QueryMapper;
+import com.avdhoot.StudyGroupFinderAPI.repository.groupRepository.GroupMembershipRepository;
 import com.avdhoot.StudyGroupFinderAPI.repository.queryRepository.AnswerRepository;
+import com.avdhoot.StudyGroupFinderAPI.repository.queryRepository.GroupQueryRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -22,13 +23,19 @@ public class ReplyService {
 
     private final AnswerRepository answerRepository;
     private final QueryMapper queryMapper;
+    private final GroupMembershipRepository groupMembershipRepository;
     private final EntityAndRelationshipsFinder entityAndRelationshipsFinder;
+    private final GroupQueryRepository groupQueryRepository;
 
-    public ReplyResponse createReply(int groupId, int questionQueryId, ReplyRequest request) {
+    public ReplyResponse createReply(int groupId, int questionQueryId, ReplyRequest request, int replyCreatorId) {
 
         Group group = entityAndRelationshipsFinder.getGroupOrThrow(groupId);
-        Query query = entityAndRelationshipsFinder.getQueryInGroupOrThrow(questionQueryId, groupId);
-        User user = entityAndRelationshipsFinder.getUserOrThrow(request.memberId());
+        Query query = entityAndRelationshipsFinder.getQueryInGroupOrThrow(groupId,questionQueryId);
+        User user = entityAndRelationshipsFinder.getUserOrThrow(replyCreatorId);
+
+        if(!groupMembershipRepository.existsByGroupAndUser(group, user)) {
+            throw  new ResourceNotFoundException(" User with ID:" + user.getId() + " does not belong to "+ group.getGroupName()+" group. Please join the Group before posting Reply");
+        }
 
         Reply reply = Reply
                 .builder()
@@ -48,9 +55,10 @@ public class ReplyService {
 
         Query query = entityAndRelationshipsFinder.getQueryInGroupOrThrow(groupId, queryId);
 
-        entityAndRelationshipsFinder.getQueryInGroupOrThrow(query.getQueryId(), group.getId());
-
-        Page<Reply> replies = answerRepository.findByGroup_IdAndQuery_QueryId( groupId,  queryId, pageable);
+        Page<Reply> replies = answerRepository.findByGroup_IdAndQuery_QueryId(
+                group.getId(),
+                query.getQueryId(),
+                pageable);
 
         return replies.map(queryMapper::toAnswerQueryResponse);
     }

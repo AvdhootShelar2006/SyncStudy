@@ -27,6 +27,7 @@ public class Group {
     private Integer maxMembers;
     private String tags;
     private Boolean isOpen;
+    private Integer totalMembers;
 
     @CreationTimestamp
     @Column(updatable = false)
@@ -34,5 +35,8 @@ public class Group {
 
     @Column(name = "group_admin")
     private String createdBy;
+
+    private Boolean isEnable;
+
 
 }

@@ -17,7 +17,7 @@ public class Report {
     private Integer id;
 
     @ManyToOne
-    @JoinColumn(name = "Reported_By")
+    @JoinColumn(name = "reported_By")
     private User reportedBy;
 
     @ManyToOne
@@ -32,4 +32,5 @@ public class Report {
     @Enumerated(EnumType.STRING)
     private ReportStatus status;
     private LocalDateTime reportedTime;
+
 }
