@@ -52,7 +52,6 @@ public class ReportController {
         return new ResponseEntity<>(reportStatusResponses, HttpStatus.OK);
     }
 
-
     @PreAuthorize("@groupSecurityConfig.hasRole(authentication, #groupId, T(com.avdhoot.StudyGroupFinderAPI.enums.GroupRole).OWNER)")
     @PatchMapping("/group/{groupId}/reports/{reportId}/status")
     public ResponseEntity<ReportStatusResponse> updateReportStatus(

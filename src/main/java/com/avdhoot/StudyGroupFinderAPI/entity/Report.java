@@ -22,7 +22,7 @@ public class Report {
 
     @ManyToOne
     @JoinColumn(name="target_Group_Id")
-    private Group targetGroupId;
+    private Group targetGroup;
 
     @ManyToOne
     @JoinColumn(name = "target_member_id")

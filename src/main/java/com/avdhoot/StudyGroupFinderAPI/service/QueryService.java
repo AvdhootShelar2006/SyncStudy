@@ -7,7 +7,7 @@ import com.avdhoot.StudyGroupFinderAPI.mapper.QueryMapper;
 import com.avdhoot.StudyGroupFinderAPI.dto.queryDto.CreateQueryRequest;
 import com.avdhoot.StudyGroupFinderAPI.dto.queryDto.CreateQueryResponse;
 import com.avdhoot.StudyGroupFinderAPI.repository.groupRepository.GroupMembershipRepository;
-import com.avdhoot.StudyGroupFinderAPI.repository.queryRepository.AnswerRepository;
+import com.avdhoot.StudyGroupFinderAPI.repository.queryRepository.ReplyRepository;
 import com.avdhoot.StudyGroupFinderAPI.repository.queryRepository.GroupQueryRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -21,7 +21,7 @@ import java.time.LocalDate;
 public class QueryService {
 
     private final GroupQueryRepository groupQueryRepository;
-    private final AnswerRepository answerRepository;
+    private final ReplyRepository replyRepository;
     private final GroupMembershipRepository groupMembershipRepository;
     private final QueryMapper queryMapper;
     private final EntityAndRelationshipsFinder entityAndRelationshipsFinder;
@@ -73,5 +73,9 @@ public class QueryService {
         return queryResponse;
     }
 
+    public void deleteGroupQueryById(Integer groupId, Integer queryId) {
+        Query query = entityAndRelationshipsFinder.getQueryInGroupOrThrow(groupId,queryId);
+        groupQueryRepository.delete(query);
+    }
 }
 

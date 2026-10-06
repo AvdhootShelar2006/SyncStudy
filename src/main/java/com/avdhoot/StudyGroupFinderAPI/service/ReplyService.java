@@ -3,12 +3,11 @@ package com.avdhoot.StudyGroupFinderAPI.service;
 import com.avdhoot.StudyGroupFinderAPI.dto.answerQuery.ReplyRequest;
 import com.avdhoot.StudyGroupFinderAPI.dto.answerQuery.ReplyResponse;
 import com.avdhoot.StudyGroupFinderAPI.entity.*;
-import com.avdhoot.StudyGroupFinderAPI.exception.AlreadyExistsException;
 import com.avdhoot.StudyGroupFinderAPI.exception.EntityAndRelationshipsFinder;
 import com.avdhoot.StudyGroupFinderAPI.exception.ResourceNotFoundException;
 import com.avdhoot.StudyGroupFinderAPI.mapper.QueryMapper;
 import com.avdhoot.StudyGroupFinderAPI.repository.groupRepository.GroupMembershipRepository;
-import com.avdhoot.StudyGroupFinderAPI.repository.queryRepository.AnswerRepository;
+import com.avdhoot.StudyGroupFinderAPI.repository.queryRepository.ReplyRepository;
 import com.avdhoot.StudyGroupFinderAPI.repository.queryRepository.GroupQueryRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -21,7 +20,7 @@ import java.time.LocalDate;
 @RequiredArgsConstructor
 public class ReplyService {
 
-    private final AnswerRepository answerRepository;
+    private final ReplyRepository replyRepository;
     private final QueryMapper queryMapper;
     private final GroupMembershipRepository groupMembershipRepository;
     private final EntityAndRelationshipsFinder entityAndRelationshipsFinder;
@@ -44,22 +43,25 @@ public class ReplyService {
                 .query(query)
                 .group(group).createdAt(LocalDate.now())
                 .build();
-        answerRepository.save(reply);
+        replyRepository.save(reply);
 
         return queryMapper.toAnswerQueryResponse(reply);
     }
 
     public Page<ReplyResponse> getAllSolutions(Pageable pageable, int groupId, int queryId) {
-
         Group group = entityAndRelationshipsFinder.getGroupOrThrow(groupId);
-
         Query query = entityAndRelationshipsFinder.getQueryInGroupOrThrow(groupId, queryId);
 
-        Page<Reply> replies = answerRepository.findByGroup_IdAndQuery_QueryId(
+        Page<Reply> replies = replyRepository.findByGroup_IdAndQuery_QueryId(
                 group.getId(),
                 query.getQueryId(),
                 pageable);
 
         return replies.map(queryMapper::toAnswerQueryResponse);
+    }
+
+    public void deleteReply(Integer groupId, Integer queryId, Integer replyId) {
+        Reply reply = entityAndRelationshipsFinder.getReplyInQueryAndGroupOrThrow(groupId, queryId, replyId);
+        replyRepository.delete(reply);
     }
 }

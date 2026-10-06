@@ -53,7 +53,7 @@ public class ReportService {
                 .reason(request.reason())
                 .status(ReportStatus.PENDING)
                 .reportedTime(LocalDateTime.now())
-                .targetGroupId(group)
+                .targetGroup(group)
                 .build();
 
         reportRepository.save(report);
