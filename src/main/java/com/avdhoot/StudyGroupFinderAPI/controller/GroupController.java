@@ -24,12 +24,12 @@ public class GroupController {
 
     private final GroupService groupService;
 
-    // TODO: Fix every dto so that it returns the sepcific id and fix enable as to expose int dto for gorup
+    // TODO: Fix every dto so that it returns the specific id and fix enable as to expose int dto for group
     public GroupController(GroupService groupService) {
         this.groupService = groupService;
     }
-    /*
-        Create Group
+    /**
+      *  Create Group
      */
     @PostMapping("/createGroup")
     public ResponseEntity<GroupResponseDto> createGroup(
@@ -44,8 +44,8 @@ public class GroupController {
                     .body(groupResponseDto);
     }
 
-    /*
-        Update Groups
+    /**
+     *  Update Groups
      */
     @PreAuthorize("@groupSecurityConfig.hasRole(authentication, #groupId, T(com.avdhoot.StudyGroupFinderAPI.enums.GroupRole).OWNER)")
     @PatchMapping("/updateGroup/{groupId}")
@@ -57,8 +57,8 @@ public class GroupController {
     }
 
 
-    /*
-        Get All the Groups
+    /**
+     *  Get All the Groups
     */
     @PreAuthorize("isAuthenticated()")
     @GetMapping("/groups")
@@ -73,8 +73,8 @@ public class GroupController {
     }
 
 
-    /*
-        Get Group By Id
+    /**
+     * Get Group By ID
      */
     @PreAuthorize("isAuthenticated()")
     @GetMapping("/group/{groupId}")
@@ -82,8 +82,8 @@ public class GroupController {
         return ResponseEntity.ok(groupService.getGroupById(groupId));
     }
 
-    /*
-        Join Group
+    /**
+     *  Join Group
      */
     // TODO: Fix the join group for max member check and create and exception custom
     @PreAuthorize("isAuthenticated()")
@@ -96,8 +96,8 @@ public class GroupController {
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
-    /*
-        Get All Members in a Group
+    /**
+     *  Get All Members in a Group
      */
     @PreAuthorize("@groupSecurityConfig.hasRole(authentication, #groupId, T(com.avdhoot.StudyGroupFinderAPI.enums.GroupRole).OWNER)")
     @GetMapping("/groupMembers/{groupId}/members")
@@ -113,10 +113,10 @@ public class GroupController {
         return new ResponseEntity<>(allMembers,HttpStatus.OK);
     }
 
-    /*
-        Leave Group
+    /**
+     * Leave Group
      */
-    @PreAuthorize("@groupSecurityConfig.isGroupMember(authentication, #groupId)")
+    @PreAuthorize("@groupSecurityConfig.hasRole(authentication, #groupId, T(com.avdhoot.StudyGroupFinderAPI.enums.GroupRole).MEMBER)")
     @DeleteMapping("/groups/{groupId}/leave")
     public ResponseEntity<LeaveResponseDto> leaveGroup(
             @PathVariable("groupId") Integer groupId,
@@ -124,6 +124,20 @@ public class GroupController {
     ){
         LeaveResponseDto response = groupService.leaveGroup(groupId, userDetails.getId());
         return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+
+    /**
+     * Remove member only by Group OWNER
+     */
+    @PreAuthorize("@groupSecurityConfig.canManageMember(authentication, #groupId, #userId)")
+    @DeleteMapping("/groupMembers/{groupId}/members/{userId}")
+    public ResponseEntity<Void> removeMember(
+            @PathVariable int groupId,
+            @PathVariable int userId
+    ) {
+        groupService.removeMember(groupId, userId);
+        return ResponseEntity.noContent().build();
     }
 
     /*
@@ -137,9 +151,9 @@ public class GroupController {
             @RequestParam String keyword){
         int safeSize = Math.min(size, 50);
         Pageable pageable = PageRequest.of(page, safeSize,Sort.by("groupName"));
-        Page<GroupResponseDto> responseDtos = groupService.searchGroups(pageable, keyword);
+        Page<GroupResponseDto> responseDto = groupService.searchGroups(pageable, keyword);
         System.out.println("Searching with " + keyword);
-        return ResponseEntity.ok(responseDtos);
+        return ResponseEntity.ok(responseDto);
     }
 
 
@@ -154,7 +168,14 @@ public class GroupController {
             @AuthenticationPrincipal CustomUserDetails userDetails){
         Pageable pageable = PageRequest.of(page, size);
 
-        Page<GroupResponseDto> createGroupRequestDtos = groupService.getAllGroupsUserIsJoinedIn(pageable, userDetails);
-        return ResponseEntity.ok(createGroupRequestDtos);
+        Page<GroupResponseDto> createGroupRequestDto = groupService.getAllGroupsUserIsJoinedIn(pageable, userDetails);
+        return ResponseEntity.ok(createGroupRequestDto);
+    }
+
+    @PreAuthorize("@groupSecurityConfig.hasRole(authentication, #groupId, T(com.avdhoot.StudyGroupFinderAPI.enums.GroupRole).OWNER)")
+    @DeleteMapping("/group/{groupId}/delete")
+    public ResponseEntity<Void> deleteGroup(@PathVariable("groupId") Integer groupId){
+        groupService.deleteGroup(groupId);
+        return ResponseEntity.noContent().build();
     }
 }

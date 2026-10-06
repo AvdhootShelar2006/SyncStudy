@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Getter
 @Setter
@@ -30,4 +31,11 @@ public class Query {
 
     private boolean isResolved;
     private LocalDate createdAt;
+
+    @OneToMany(
+            mappedBy = "query",
+            cascade = CascadeType.REMOVE,
+            orphanRemoval = true
+    )
+    private List<Reply> replies;
 }

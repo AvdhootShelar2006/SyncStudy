@@ -122,6 +122,21 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exceptionResponse);
     }
 
+    @ExceptionHandler(ConflictOperationException.class)
+    public ResponseEntity<ExceptionResponseDto> handleConflictOperationException(
+            ConflictOperationException exception,
+            HttpServletRequest request
+    ) {
+        ExceptionResponseDto response = new ExceptionResponseDto(
+                LocalDateTime.now(),
+                HttpStatus.CONFLICT.value(),
+                HttpStatus.CONFLICT.getReasonPhrase(),
+                exception.getMessage(),
+                request.getRequestURI()
+        );
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
+    }
+
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<ExceptionResponseDto> handleRuntimeException(
             RuntimeException exception,

@@ -1,11 +1,13 @@
 package com.avdhoot.StudyGroupFinderAPI.exception;
 
 import com.avdhoot.StudyGroupFinderAPI.entity.Query;
+import com.avdhoot.StudyGroupFinderAPI.entity.Reply;
 import com.avdhoot.StudyGroupFinderAPI.entity.User;
 import com.avdhoot.StudyGroupFinderAPI.entity.Group;
 import com.avdhoot.StudyGroupFinderAPI.repository.UserRepository;
 import com.avdhoot.StudyGroupFinderAPI.repository.groupRepository.GroupRepository;
 import com.avdhoot.StudyGroupFinderAPI.repository.queryRepository.GroupQueryRepository;
+import com.avdhoot.StudyGroupFinderAPI.repository.queryRepository.ReplyRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -16,6 +18,7 @@ public class EntityAndRelationshipsFinder {
     private final GroupRepository groupRepository;
     private final UserRepository userRepository;
     private final GroupQueryRepository groupQueryRepository;
+    private final ReplyRepository replyRepository;
 
     public Group getGroupOrThrow(int groupId){
         return groupRepository.findById(groupId).orElseThrow(()-> new ResourceNotFoundException("Group with ID: " + groupId + " not found."));
@@ -33,5 +36,10 @@ public class EntityAndRelationshipsFinder {
             throw new ResourceNotFoundException("Group with ID: " + groupId + " does not contain this query");
         }
         return query;
+    }
+
+    public Reply getReplyInQueryAndGroupOrThrow(Integer groupId, Integer queryId, Integer replyId) {
+        Reply reply = replyRepository.findByReplyIdAndQuery_QueryIdAndGroup_Id(replyId, queryId, groupId).orElseThrow(() -> new ResourceNotFoundException("Reply with ID: " + replyId + " does not belong to this query/group"));
+        return reply;
     }
 }

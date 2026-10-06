@@ -5,6 +5,7 @@ import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Getter
 @Setter
@@ -35,8 +36,26 @@ public class Group {
 
     @Column(name = "group_admin")
     private String createdBy;
-
     private Boolean isEnable;
 
+    @OneToMany(
+            mappedBy = "group",
+            cascade = CascadeType.REMOVE,
+            orphanRemoval = true
+    )
+    private List<GroupMembership> memberships;
 
+    @OneToMany(
+            mappedBy = "group",
+            cascade = CascadeType.REMOVE,
+            orphanRemoval = true
+    )
+    private List<Query> queries;
+
+    @OneToMany(
+            mappedBy = "targetGroup",
+            cascade = CascadeType.REMOVE,
+            orphanRemoval = true
+    )
+    private List<Report> reports;
 }

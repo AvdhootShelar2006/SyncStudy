@@ -9,7 +9,6 @@ import com.avdhoot.StudyGroupFinderAPI.mapper.GroupMapper;
 import com.avdhoot.StudyGroupFinderAPI.mapper.MembershipMapper;
 import com.avdhoot.StudyGroupFinderAPI.dto.groupDto.CreateGroupRequestDto;
 import com.avdhoot.StudyGroupFinderAPI.dto.groupDto.GroupResponseDto;
-import com.avdhoot.StudyGroupFinderAPI.repository.RoleRepository;
 import com.avdhoot.StudyGroupFinderAPI.repository.groupRepository.GroupMembershipRepository;
 import com.avdhoot.StudyGroupFinderAPI.repository.groupRepository.GroupRepository;
 import lombok.RequiredArgsConstructor;
@@ -18,8 +17,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -30,7 +27,6 @@ public class GroupService {
     private final GroupMapper groupMapper;
     private final MembershipMapper membershipMapper;
     private final EntityAndRelationshipsFinder entityRelationshipsFinder;
-    private final RoleRepository roleRepository;
 
     public GroupResponseDto createGroup(CreateGroupRequestDto requestDto, User user) {
         Group group = groupMapper.toEntity(requestDto);
@@ -112,15 +108,18 @@ public class GroupService {
                     .orElseThrow(
                             ()->new ResourceNotFoundException("User with Id: " + user.getId() +" no longer part of the Group")
                     );
-
+        if (membership.getGroupRole() == GroupRole.OWNER) {
+            throw new ConflictOperationException("The community owner cannot leave until ownership transfer is supported.");
+        }
             groupMembershipRepository.delete(membership);
-
             LeaveResponseDto leaveResponse = new  LeaveResponseDto(
                     user.getId(),
                     user.getName(),
                     group.getId(),
                     LocalDateTime.now()
             );
+        groupMembershipRepository.delete(membership);
+        group.setTotalMembers(Math.max(0, (group.getTotalMembers() == null ? 1 : group.getTotalMembers()) - 1));
         return leaveResponse;
     }
 
@@ -130,35 +129,25 @@ public class GroupService {
     }
 
     public JoinGroupResponse joinGroup(int groupId, User user) {
-
         Group group = entityRelationshipsFinder.getGroupOrThrow(groupId);
         Integer totalMembers = group.getTotalMembers();
 
         if (!group.getIsEnable()) {
-            throw new GroupNotActiveException(
-                    "Group " + group.getGroupName() + " is currently disabled. You cannot join this group."
-            );
+            throw new GroupNotActiveException("Group " + group.getGroupName() + " is currently disabled. You cannot join this group.");
         }
-
         if (totalMembers >= group.getMaxMembers()) {
-            throw new GroupFullException(
-                    "Group maximum number of members exceeded"
-            );
+            throw new GroupFullException("Group maximum number of members exceeded");
         }
-
         if(groupMembershipRepository.existsByGroup_IdAndUser_Id(group.getId(), user.getId())){
             throw new AlreadyExistsException("User with id: " + user.getId() + " already exists in the group");
         }
         totalMembers = totalMembers + 1;
         group.setTotalMembers(totalMembers);
         groupRepository.save(group);
-
         GroupMembership groupMembership = membershipMapper.createMembership(user, group, GroupRole.MEMBER);
         groupMembershipRepository.save(groupMembership);
 
         JoinGroupResponse joinGroupResponse = membershipMapper.toJoinGroupResponse(user, group, groupMembership);
-
-
         return joinGroupResponse;
     }
 
@@ -167,5 +156,23 @@ public class GroupService {
         Page<Group> groups = groupMembershipRepository.findGroupsByUserId(userDetails.getId(), pageable);
 
         return groups.map(groupMapper::toGroupResponseDto);
+    }
+
+    public void deleteGroup(Integer groupId) {
+        Group group = entityRelationshipsFinder.getGroupOrThrow(groupId);
+        groupRepository.delete(group);
+    }
+
+    public void removeMember(int groupId, int userId) {
+        Group group =  entityRelationshipsFinder.getGroupOrThrow(groupId);
+        GroupMembership groupMembership = groupMembershipRepository.findByGroup_IdAndUser_Id(group.getId(), userId).orElseThrow(
+            () -> new ResourceNotFoundException("Community member was not found."));
+        if (groupMembership.getGroupRole() == GroupRole.OWNER) {
+            throw new ConflictOperationException("The community owner cannot be removed.");
+        }
+
+        groupMembershipRepository.delete(groupMembership);
+        group.setTotalMembers(Math.max(0, (group.getTotalMembers() == null ? 1 : group.getTotalMembers()) - 1));
+        groupRepository.save(group);
     }
 }

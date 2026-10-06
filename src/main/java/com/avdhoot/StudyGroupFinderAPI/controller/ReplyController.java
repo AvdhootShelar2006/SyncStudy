@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.*;
 @SecurityRequirement(name = "bearerAuth")
 public class ReplyController {
 
-    private final ReplyService replyServiceService;
+    private final ReplyService replyService;
 
     @PostMapping("/groups/{groupId}/query/{queryId}")
     public ResponseEntity<ReplyResponse> createReply(
@@ -31,11 +31,14 @@ public class ReplyController {
             @Valid @RequestBody ReplyRequest request,
             @AuthenticationPrincipal CustomUserDetails userDetails){
 
-        ReplyResponse response = replyServiceService.createReply(groupId, queryId,request, userDetails.getId());
+        ReplyResponse response = replyService.createReply(groupId, queryId,request, userDetails.getId());
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @PreAuthorize("@groupSecurityConfig.isGroupMember(authentication, #groupId)")
+    @PreAuthorize("""
+    @groupSecurityConfig.hasRole(authentication, #groupId, T(com.avdhoot.StudyGroupFinderAPI.enums.GroupRole).MEMBER)|| 
+    @groupSecurityConfig.hasRole(authentication, #groupId, T(com.avdhoot.StudyGroupFinderAPI.enums.GroupRoleGroupRole).OWNER)
+    """)
     @GetMapping("/groups/{groupId}/query/{queryId}/solutions")
     public ResponseEntity<Page<ReplyResponse>> getAllSolutions(
             @RequestParam(defaultValue = "0") int page,
@@ -46,9 +49,20 @@ public class ReplyController {
 
         Pageable pageable = PageRequest.of(page, size);
 
-        Page<ReplyResponse> answerQueries = replyServiceService.getAllSolutions(pageable, groupId, queryId);
+        Page<ReplyResponse> answerQueries = replyService.getAllSolutions(pageable, groupId, queryId);
         return new ResponseEntity<>(answerQueries, HttpStatus.OK);
     }
 
+
+    @PreAuthorize("@groupSecurityConfig.isReplyOwner(authentication, #replyId)")
+    @DeleteMapping("/group/{groupId}/query/{queryId}/reply/{replyId}")
+    public ResponseEntity<Void> deleteReply(
+            @PathVariable("groupId") Integer groupId,
+            @PathVariable("queryId") Integer queryId,
+            @PathVariable ("replyId") Integer replyId)
+    {
+        replyService.deleteReply(groupId, queryId, replyId);
+        return ResponseEntity.noContent().build();
+    }
 
 }

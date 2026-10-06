@@ -66,4 +66,13 @@ public class QueryController {
         return new ResponseEntity<>(queryById , HttpStatus.OK);
     }
 
+    @PreAuthorize("@groupSecurityConfig.isQueryOwner(authentication, #queryId)")
+    @DeleteMapping("/groups/{groupId}/query/{queryId}")
+    public ResponseEntity<Void> deleteGroupQueryById(
+            @PathVariable("groupId") Integer groupId,
+            @PathVariable("queryId") Integer queryId) {
+        queryService.deleteGroupQueryById(groupId, queryId);
+        return ResponseEntity.noContent().build();
+    }
+
 }
