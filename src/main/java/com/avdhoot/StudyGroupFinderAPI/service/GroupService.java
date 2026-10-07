@@ -11,6 +11,7 @@ import com.avdhoot.StudyGroupFinderAPI.dto.groupDto.CreateGroupRequestDto;
 import com.avdhoot.StudyGroupFinderAPI.dto.groupDto.GroupResponseDto;
 import com.avdhoot.StudyGroupFinderAPI.repository.groupRepository.GroupMembershipRepository;
 import com.avdhoot.StudyGroupFinderAPI.repository.groupRepository.GroupRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -28,27 +29,26 @@ public class GroupService {
     private final MembershipMapper membershipMapper;
     private final EntityAndRelationshipsFinder entityRelationshipsFinder;
 
+    @Transactional
     public GroupResponseDto createGroup(CreateGroupRequestDto requestDto, User user) {
         Group group = groupMapper.toEntity(requestDto);
 
         if(groupRepository.existsByGroupName(group.getGroupName())){
             throw new DuplicateResourceException("Group with name: " + group.getGroupName() + " already exist.");
         }
-
         group.setIsOpen(true);
         group.setCreatedBy(user.getUsername());
         group.setIsEnable(true);
-
+        group.setTotalMembers(1);
         GroupMembership membership = membershipMapper.createMembership(user, group, GroupRole.OWNER);
-
         groupRepository.save(group);
         groupMembershipRepository.save(membership);
 
         GroupResponseDto responseDto = groupMapper.toGroupResponseDto(group);
-
         return responseDto;
     }
 
+    @Transactional
     public GroupResponseDto updateGroup(int groupId, UpdateGroupRequestDto updateGroup) {
         Group existingGroup = entityRelationshipsFinder.getGroupOrThrow(groupId);
 
@@ -72,17 +72,12 @@ public class GroupService {
         if (updateGroup.maxMembers() != null) {
             existingGroup.setMaxMembers(updateGroup.maxMembers());
         }
-
         GroupResponseDto responseDto = groupMapper.toGroupResponseDto(existingGroup);
-        groupRepository.save(existingGroup);
-
         return responseDto;
     }
 
     public Page<GroupResponseDto> getAllGroups(Pageable pageable) {
-
         Page<Group> groups = groupRepository.findAll(pageable);
-
         return groups.map(groupMapper::toGroupResponseDto);
     }
 
@@ -93,12 +88,11 @@ public class GroupService {
 
     public Page<GroupMemberDetailsResponse> getAllGroupMembers(Pageable pageable, int groupId) {
         entityRelationshipsFinder.getGroupOrThrow(groupId);
-
         Page<GroupMembership> memberships = groupMembershipRepository.findByGroup_Id(pageable,groupId);
-
         return memberships.map(membershipMapper::toGroupMemberDetailsResponse);
     }
 
+    @Transactional
     public LeaveResponseDto leaveGroup(int groupId, int userId ){
             User user = entityRelationshipsFinder.getUserOrThrow(userId);
             Group group = entityRelationshipsFinder.getGroupOrThrow(groupId);
@@ -111,15 +105,15 @@ public class GroupService {
         if (membership.getGroupRole() == GroupRole.OWNER) {
             throw new ConflictOperationException("The community owner cannot leave until ownership transfer is supported.");
         }
-            groupMembershipRepository.delete(membership);
-            LeaveResponseDto leaveResponse = new  LeaveResponseDto(
+        groupMembershipRepository.delete(membership);
+        Integer totalMembers = group.getTotalMembers();
+        group.setTotalMembers(Math.max(0, (totalMembers == null ? 1 : totalMembers) - 1));
+        LeaveResponseDto leaveResponse = new  LeaveResponseDto(
                     user.getId(),
                     user.getName(),
                     group.getId(),
                     LocalDateTime.now()
-            );
-        groupMembershipRepository.delete(membership);
-        group.setTotalMembers(Math.max(0, (group.getTotalMembers() == null ? 1 : group.getTotalMembers()) - 1));
+        );
         return leaveResponse;
     }
 
@@ -128,6 +122,7 @@ public class GroupService {
         return groupRepository.searchUsingKeyword(pattern, pageable).map(groupMapper::toGroupResponseDto);
     }
 
+    @Transactional
     public JoinGroupResponse joinGroup(int groupId, User user) {
         Group group = entityRelationshipsFinder.getGroupOrThrow(groupId);
         Integer totalMembers = group.getTotalMembers();
@@ -143,7 +138,7 @@ public class GroupService {
         }
         totalMembers = totalMembers + 1;
         group.setTotalMembers(totalMembers);
-        groupRepository.save(group);
+
         GroupMembership groupMembership = membershipMapper.createMembership(user, group, GroupRole.MEMBER);
         groupMembershipRepository.save(groupMembership);
 
@@ -151,18 +146,18 @@ public class GroupService {
         return joinGroupResponse;
     }
 
-    public Page<GroupResponseDto> getAllGroupsUserIsJoinedIn(Pageable pageable, CustomUserDetails userDetails) {
-
+    public Page<GroupResponseDto> getAllGroupsUserIsJoinedIn(Pageable pageable, CustomUserDetails userDetails){
         Page<Group> groups = groupMembershipRepository.findGroupsByUserId(userDetails.getId(), pageable);
-
         return groups.map(groupMapper::toGroupResponseDto);
     }
 
+    @Transactional
     public void deleteGroup(Integer groupId) {
         Group group = entityRelationshipsFinder.getGroupOrThrow(groupId);
         groupRepository.delete(group);
     }
 
+    @Transactional
     public void removeMember(int groupId, int userId) {
         Group group =  entityRelationshipsFinder.getGroupOrThrow(groupId);
         GroupMembership groupMembership = groupMembershipRepository.findByGroup_IdAndUser_Id(group.getId(), userId).orElseThrow(
@@ -173,6 +168,5 @@ public class GroupService {
 
         groupMembershipRepository.delete(groupMembership);
         group.setTotalMembers(Math.max(0, (group.getTotalMembers() == null ? 1 : group.getTotalMembers()) - 1));
-        groupRepository.save(group);
     }
 }

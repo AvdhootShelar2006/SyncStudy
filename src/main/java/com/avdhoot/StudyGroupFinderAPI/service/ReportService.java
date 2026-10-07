@@ -12,6 +12,7 @@ import com.avdhoot.StudyGroupFinderAPI.exception.ResourceNotFoundException;
 import com.avdhoot.StudyGroupFinderAPI.mapper.ReportMapper;
 import com.avdhoot.StudyGroupFinderAPI.repository.groupRepository.GroupMembershipRepository;
 import com.avdhoot.StudyGroupFinderAPI.repository.ReportRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -33,17 +34,12 @@ public class ReportService {
 
         User reportedBy = entityAndRelationshipsFinder.getUserOrThrow(reportedById);
         if (!groupMembershipRepository.existsByGroupAndUser(group, reportedBy)) {
-            throw new ResourceNotFoundException(
-                     "You are not a part of " +group.getGroupName()+ ". Please join the group before reporting any member.");
+            throw new ResourceNotFoundException("You are not a part of " +group.getGroupName()+ ". Please join the group before reporting any member.");
         }
-
 
         User targetUser = entityAndRelationshipsFinder.getUserOrThrow(request.targetMember());
         if(!groupMembershipRepository.existsByGroupAndUser(group, targetUser)){
-            throw new ResourceNotFoundException(
-                    "The Member you trying to report in not a part of "
-                            + group.getGroupName()
-            );
+            throw new ResourceNotFoundException("The Member you trying to report in not a part of " + group.getGroupName());
         }
 
         Report report = Report
@@ -55,7 +51,6 @@ public class ReportService {
                 .reportedTime(LocalDateTime.now())
                 .targetGroup(group)
                 .build();
-
         reportRepository.save(report);
     }
 
@@ -65,6 +60,7 @@ public class ReportService {
         return reports.map(reportMapper::toReportStatusResponse);
     }
 
+    @Transactional
     public ReportStatusResponse updateReportStatus( int groupId, int reportId, ReportStatusRequest reportStatusRequest) {
         Report report = reportRepository.findByTargetGroupId_IdAndId(groupId, reportId).orElseThrow(()->new ResourceNotFoundException("Report with " + reportId + " not found"));
 
@@ -72,7 +68,6 @@ public class ReportService {
             report.setStatus(reportStatusRequest.status());
         }
         ReportStatusResponse reportStatusResponse = reportMapper.toReportStatusResponse(report);
-        reportRepository.save(report);
         return reportStatusResponse;
     }
 }

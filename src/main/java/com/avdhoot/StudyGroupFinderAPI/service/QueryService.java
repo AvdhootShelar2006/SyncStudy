@@ -9,6 +9,7 @@ import com.avdhoot.StudyGroupFinderAPI.dto.queryDto.CreateQueryResponse;
 import com.avdhoot.StudyGroupFinderAPI.repository.groupRepository.GroupMembershipRepository;
 import com.avdhoot.StudyGroupFinderAPI.repository.queryRepository.ReplyRepository;
 import com.avdhoot.StudyGroupFinderAPI.repository.queryRepository.GroupQueryRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -21,11 +22,9 @@ import java.time.LocalDate;
 public class QueryService {
 
     private final GroupQueryRepository groupQueryRepository;
-    private final ReplyRepository replyRepository;
     private final GroupMembershipRepository groupMembershipRepository;
     private final QueryMapper queryMapper;
     private final EntityAndRelationshipsFinder entityAndRelationshipsFinder;
-
 
     public CreateQueryResponse postQuery(int groupId,CreateQueryRequest request ,int creatorId) {
         User user = entityAndRelationshipsFinder.getUserOrThrow(creatorId);
@@ -49,30 +48,25 @@ public class QueryService {
     }
 
     public Page<CreateQueryResponse> getAllGroupQueries( Pageable pageable , int groupId) {
-
         Group group = entityAndRelationshipsFinder.getGroupOrThrow(groupId);
-
         Page<Query> queries = groupQueryRepository.findByGroup_Id(pageable, group.getId());
-
         return queries.map(queryMapper::toCreateQueryResponse);
     }
 
     public CreateQueryResponse getGroupQueryById(int questionQueryId, int groupId) {
         Query query = entityAndRelationshipsFinder.getQueryInGroupOrThrow(groupId,questionQueryId);
-
         return queryMapper.toCreateQueryResponse(query);
     }
 
+    @Transactional
     public CreateQueryResponse resolveGroupQuery(int questionQueryId, int groupId, boolean resolve) {
         Query query = entityAndRelationshipsFinder.getQueryInGroupOrThrow(groupId, questionQueryId);
         query.setResolved(resolve);
-
         CreateQueryResponse queryResponse = queryMapper.toCreateQueryResponse(query);
-        groupQueryRepository.save(query);
-
         return queryResponse;
     }
 
+    @Transactional
     public void deleteGroupQueryById(Integer groupId, Integer queryId) {
         Query query = entityAndRelationshipsFinder.getQueryInGroupOrThrow(groupId,queryId);
         groupQueryRepository.delete(query);
