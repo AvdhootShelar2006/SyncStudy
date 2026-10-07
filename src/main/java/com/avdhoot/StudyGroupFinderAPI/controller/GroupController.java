@@ -36,9 +36,7 @@ public class GroupController {
             @Valid @RequestBody CreateGroupRequestDto requestDto,
             @AuthenticationPrincipal CustomUserDetails userDetails
             ){
-
             GroupResponseDto groupResponseDto = groupService.createGroup(requestDto, userDetails.getUser());
-
             return ResponseEntity
                     .status(HttpStatus.OK)
                     .body(groupResponseDto);
@@ -140,7 +138,7 @@ public class GroupController {
         return ResponseEntity.noContent().build();
     }
 
-    /*
+    /*gigit
         Search By Keyword
      */
     @PreAuthorize("isAuthenticated()")

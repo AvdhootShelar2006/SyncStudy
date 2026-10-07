@@ -25,7 +25,6 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final MemberMapper memberMapper;
-    private final EntityAndRelationshipsFinder entityAndRelationshipsFinder;
     private final RoleRepository rolesRepository;
     private final PasswordEncoder passwordEncoder;
 
@@ -35,30 +34,17 @@ public class UserService {
             throw new DuplicateResourceException("User with email " + requestDto.email()+" already exits");
         }
         User user = new User();
+        Roles roles = rolesRepository.findByName("ROLE_USER").orElseThrow(()-> new ResourceNotFoundException("USER not Found!!"));
+        String encodedPassword = passwordEncoder.encode(requestDto.password());
+
         user.setName(requestDto.name());
         user.setUsername(requestDto.username());
-
-        Roles roles = rolesRepository.findByName("ROLE_USER").orElseThrow(()-> new ResourceNotFoundException("USER not Found!!"));
-
-        String encodedPassword =
-                passwordEncoder.encode(requestDto.password());
-
         user.setPassword(encodedPassword);
         user.setEmail(requestDto.email());
         user.getRoles().add(roles);
         user.setCreatedAt(LocalDateTime.now());
-
         userRepository.save(user);
         return memberMapper.toMemberResponseDto(user);
-    }
-
-    public CreateUserDetailResponse getMemberById(int userId) {
-        User user = entityAndRelationshipsFinder.getUserOrThrow(userId);
-        return memberMapper.toMemberResponseDto(user);
-    }
-
-    public CustomUserDetails getAuthorities(CustomUserDetails userDetails) {
-        return null;
     }
 
 }

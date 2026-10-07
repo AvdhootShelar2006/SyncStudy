@@ -10,6 +10,7 @@ import com.avdhoot.StudyGroupFinderAPI.mapper.GroupMapper;
 import com.avdhoot.StudyGroupFinderAPI.mapper.MemberMapper;
 import com.avdhoot.StudyGroupFinderAPI.repository.UserRepository;
 import com.avdhoot.StudyGroupFinderAPI.repository.groupRepository.GroupRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -25,22 +26,17 @@ public class AdminService {
     private final MemberMapper memberMapper;
     private final GroupRepository groupRepository;
 
-
+    @Transactional
     public String disableOrEnableUser(int userId, boolean enabled) {
         User user =  entityAndRelationshipsFinder.getUserOrThrow(userId);
-
         user.setEnabled(enabled);
-
-        userRepository.save(user);
-
         return enabled ? "User with name "+ user.getUsername() + " is Successfully enable" : "User with name " + user.getUsername() + " is Successfully disable";
     }
 
+    @Transactional
     public String disableOrEnableGroup(int groupId, boolean enabled) {
         Group group = entityAndRelationshipsFinder.getGroupOrThrow(groupId);
-
         group.setIsEnable(enabled);
-        groupRepository.save(group);
         return enabled ? "Group with name " + group.getGroupName()+ " is Successfully enable" : "Group with name " + group.getGroupName()+" is Successfully disable";
     }
 

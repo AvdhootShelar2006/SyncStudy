@@ -9,6 +9,7 @@ import com.avdhoot.StudyGroupFinderAPI.mapper.QueryMapper;
 import com.avdhoot.StudyGroupFinderAPI.repository.groupRepository.GroupMembershipRepository;
 import com.avdhoot.StudyGroupFinderAPI.repository.queryRepository.ReplyRepository;
 import com.avdhoot.StudyGroupFinderAPI.repository.queryRepository.GroupQueryRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -26,8 +27,8 @@ public class ReplyService {
     private final EntityAndRelationshipsFinder entityAndRelationshipsFinder;
     private final GroupQueryRepository groupQueryRepository;
 
+    @Transactional
     public ReplyResponse createReply(int groupId, int questionQueryId, ReplyRequest request, int replyCreatorId) {
-
         Group group = entityAndRelationshipsFinder.getGroupOrThrow(groupId);
         Query query = entityAndRelationshipsFinder.getQueryInGroupOrThrow(groupId,questionQueryId);
         User user = entityAndRelationshipsFinder.getUserOrThrow(replyCreatorId);
@@ -44,7 +45,6 @@ public class ReplyService {
                 .group(group).createdAt(LocalDate.now())
                 .build();
         replyRepository.save(reply);
-
         return queryMapper.toAnswerQueryResponse(reply);
     }
 
@@ -60,6 +60,7 @@ public class ReplyService {
         return replies.map(queryMapper::toAnswerQueryResponse);
     }
 
+    @Transactional
     public void deleteReply(Integer groupId, Integer queryId, Integer replyId) {
         Reply reply = entityAndRelationshipsFinder.getReplyInQueryAndGroupOrThrow(groupId, queryId, replyId);
         replyRepository.delete(reply);
